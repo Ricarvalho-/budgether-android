@@ -1,9 +1,10 @@
 package br.edu.ifsp.scl.transaction
 
 import android.content.Context
-import android.graphics.drawable.Drawable
 import android.util.AttributeSet
+import androidx.annotation.DrawableRes
 import androidx.constraintlayout.widget.ConstraintLayout
+import br.edu.ifsp.scl.common.setCircularImage
 import kotlinx.android.synthetic.main.category_item.view.*
 
 class CategoryItemView @JvmOverloads constructor(context: Context,
@@ -14,12 +15,12 @@ class CategoryItemView @JvmOverloads constructor(context: Context,
     var viewModel: ViewModel? = null
     set(value) {
         field = value
-        imageView.setImageDrawable(value?.image)
+        if (value != null) imageView.setCircularImage(resources, value.image)
         titleTextView.text = value?.title
     }
 
     interface ViewModel {
-        val image: Drawable
+        val image: Int @DrawableRes get
         val title: String
     }
 }
