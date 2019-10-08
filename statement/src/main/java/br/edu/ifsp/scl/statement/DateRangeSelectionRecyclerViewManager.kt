@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import br.edu.ifsp.scl.common.MarginItemDecoration
+import br.edu.ifsp.scl.common.OnSnapPositionChangeCallback
 import br.edu.ifsp.scl.common.attachSnapHelperWithListener
 import br.edu.ifsp.scl.common.shortFormatted
 import java.util.*
@@ -87,19 +88,24 @@ data class DateRange(val start: Date, val end: Date) {
     }
 }
 
+typealias OnDateRangeSelectedCallback = (DateRange) -> Unit
+
 class DateRangeSelectionRecyclerViewManager(recyclerView: RecyclerView,
                                             private val selectedDateRange: DateRange = DateRange.actualMonthRange(),
-                                            onRangeSelected: (DateRange) -> Unit) {
+                                            var onRangeSelected: OnDateRangeSelectedCallback) {
 
-    private val yearManager = InnerRecyclerViewManager(selectedDateRange, onRangeSelected)
-    private val monthManager = InnerRecyclerViewManager(selectedDateRange, onRangeSelected)
-    private val recyclerViewAdapter = Adapter(listOf(yearManager, monthManager))
-    var onRangeSelected: (DateRange) -> Unit = onRangeSelected
-    set(value) {
-        field = value
-        yearManager.onRangeSelected = value
-        monthManager.onRangeSelected = value
+    private val yearManager: InnerRecyclerViewManager = InnerRecyclerViewManager(selectedDateRange) {
+        val selectedMonthAtSelectedYear = monthManager.selectedDateRange.atYearOf(it)
+        monthManager.selectedDateRange = selectedMonthAtSelectedYear
+        onRangeSelected(it)
     }
+
+    private val monthManager = InnerRecyclerViewManager(selectedDateRange) {
+        yearManager.selectedDateRange = it.yearRange()
+        onRangeSelected(it)
+    }
+
+    private val recyclerViewAdapter = Adapter(listOf(yearManager, monthManager))
 
     init {
         recyclerView.apply {
@@ -118,14 +124,8 @@ class DateRangeSelectionRecyclerViewManager(recyclerView: RecyclerView,
             })
 
             attachSnapHelperWithListener(PagerSnapHelper()) { position ->
-                val selectedRange = recyclerViewAdapter.managerAt(position).selectedRange
-
-                yearManager.recyclerViewAdapter.update(selectedRange.yearRange())
-
-                val previousMonthAtSelectedYear = monthManager.selectedRange.atYearOf(selectedRange)
-                monthManager.recyclerViewAdapter.update(previousMonthAtSelectedYear)
-
-                onRangeSelected(selectedRange)
+                val activeManager = recyclerViewAdapter.managerAt(position)
+                onRangeSelected(activeManager.selectedDateRange)
             }
         }
     }
@@ -147,28 +147,36 @@ class DateRangeSelectionRecyclerViewManager(recyclerView: RecyclerView,
     }
 }
 
-private class InnerRecyclerViewManager(private var selectedDateRange: DateRange, var onRangeSelected: (DateRange) -> Unit) {
-    val selectedRange get() = selectedDateRange
-    val recyclerViewAdapter = Adapter(selectedDateRange)
-    var recyclerView: RecyclerView? = null
-    set(value) {
-        field?.clearOnScrollListeners()
-        field = value?.apply {
-            layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-            adapter = recyclerViewAdapter
-        }?.also {
-            val margin = it.resources.getDimension(R.dimen.date_range_selection_item_horizontal_margin)
-            it.addItemDecoration(MarginItemDecoration(margin.toInt()))
+private class InnerRecyclerViewManager(selectedDateRange: DateRange, private val onRangeSelected: OnDateRangeSelectedCallback) {
+    private val recyclerViewAdapter = Adapter(selectedDateRange)
 
-            it.scrollToPosition(recyclerViewAdapter.positionOf(selectedDateRange))
-
-            it.attachSnapHelperWithListener(PagerSnapHelper()) { position ->
-                selectedDateRange = recyclerViewAdapter.rangeAt(position)
-                recyclerViewAdapter.update(selectedDateRange)
-                onRangeSelected(selectedDateRange)
+    var selectedDateRange = selectedDateRange
+        set(value) {
+            field = value.also {
+                recyclerViewAdapter.update(it)
+                recyclerView?.scrollToPosition(recyclerViewAdapter.positionOf(it))
             }
         }
-    }
+
+    var recyclerView: RecyclerView? = null
+        set(value) {
+            field?.clearOnScrollListeners()
+            field = value?.apply {
+                layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+                adapter = recyclerViewAdapter
+            }?.also {
+                val margin = it.resources.getDimension(R.dimen.date_range_selection_item_horizontal_margin)
+                it.addItemDecoration(MarginItemDecoration(margin.toInt()))
+
+                it.scrollToPosition(recyclerViewAdapter.positionOf(selectedDateRange))
+
+                it.attachSnapHelperWithListener(PagerSnapHelper()) { position ->
+                    selectedDateRange = recyclerViewAdapter.rangeAt(position)
+                    recyclerViewAdapter.update(selectedDateRange)
+                    onRangeSelected(selectedDateRange)
+                }
+            }
+        }
 
     class Adapter(selectedRange: DateRange) : RecyclerView.Adapter<Adapter.ViewHolder>() {
         private var rangeOptions: List<DateRange> = selectedRange.stream()
