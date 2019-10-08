@@ -9,18 +9,17 @@ class SnapHelperOnScrollListener(private val snapHelper: SnapHelper,
                                  var onSnapPositionChange: OnSnapPositionChangeCallback? = null) :
     RecyclerView.OnScrollListener() {
 
-    private var oldSnapPosition = RecyclerView.NO_POSITION
+    private var oldScrollState = RecyclerView.SCROLL_STATE_IDLE
 
     override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-        if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+        if (oldScrollState == RecyclerView.SCROLL_STATE_SETTLING && newState == RecyclerView.SCROLL_STATE_IDLE) {
             notifySnapPositionIfChanged(recyclerView)
         }
+        oldScrollState = newState
     }
 
     private fun notifySnapPositionIfChanged(recyclerView: RecyclerView) {
         val newPosition = snapHelper.getSnapPosition(recyclerView)
-        if (newPosition == oldSnapPosition) return
-        oldSnapPosition = newPosition
         onSnapPositionChange?.invoke(newPosition)
     }
 

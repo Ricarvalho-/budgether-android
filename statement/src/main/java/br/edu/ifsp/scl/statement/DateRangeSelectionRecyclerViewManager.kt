@@ -1,6 +1,7 @@
 package br.edu.ifsp.scl.statement
 
 import android.text.format.DateFormat
+import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
@@ -8,9 +9,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import br.edu.ifsp.scl.common.MarginItemDecoration
-import br.edu.ifsp.scl.common.OnSnapPositionChangeCallback
 import br.edu.ifsp.scl.common.attachSnapHelperWithListener
 import br.edu.ifsp.scl.common.shortFormatted
+import kotlinx.android.synthetic.main.large_centered_text_view.view.*
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -33,8 +34,9 @@ data class DateRange(val start: Date, val end: Date) {
         private fun Date.clearingUndesiredFields() = calendar.apply {
             clear(Calendar.HOUR)
             clear(Calendar.HOUR_OF_DAY)
-            clear(Calendar.HOUR_OF_DAY)
-            clear(Calendar.HOUR_OF_DAY)
+            clear(Calendar.MINUTE)
+            clear(Calendar.SECOND)
+            clear(Calendar.MILLISECOND)
         }.time
     }
 
@@ -73,12 +75,12 @@ data class DateRange(val start: Date, val end: Date) {
         when {
             relativePosition == 0 -> this
             isYear -> DateRange(
-                start.byAdding(Calendar.YEAR, relativePosition),
-                end.byAdding(Calendar.YEAR, relativePosition)
+                start.byAdding(Calendar.YEAR, relativePosition).asFirst(Calendar.DAY_OF_YEAR),
+                end.byAdding(Calendar.YEAR, relativePosition).asLast(Calendar.DAY_OF_YEAR)
             )
             isMonth -> DateRange(
-                start.byAdding(Calendar.MONTH, relativePosition),
-                end.byAdding(Calendar.MONTH, relativePosition)
+                start.byAdding(Calendar.MONTH, relativePosition).asFirst(Calendar.DAY_OF_MONTH),
+                end.byAdding(Calendar.MONTH, relativePosition).asLast(Calendar.DAY_OF_MONTH)
             )
             else -> DateRange(
                 start.byAdding(Calendar.DATE, daysInterval * relativePosition),
@@ -94,13 +96,16 @@ class DateRangeSelectionRecyclerViewManager(recyclerView: RecyclerView,
                                             private val selectedDateRange: DateRange = DateRange.actualMonthRange(),
                                             var onRangeSelected: OnDateRangeSelectedCallback) {
 
-    private val yearManager: InnerRecyclerViewManager = InnerRecyclerViewManager(selectedDateRange) {
+    private val yearManager: InnerRecyclerViewManager = InnerRecyclerViewManager(selectedDateRange.yearRange()) {
         val selectedMonthAtSelectedYear = monthManager.selectedDateRange.atYearOf(it)
         monthManager.selectedDateRange = selectedMonthAtSelectedYear
         onRangeSelected(it)
     }
 
-    private val monthManager = InnerRecyclerViewManager(selectedDateRange) {
+    private val monthManager = InnerRecyclerViewManager(selectedDateRange.let { when {
+        it.isMonth -> it
+        else -> DateRange.actualMonthRange().atYearOf(it)
+    }}) {
         yearManager.selectedDateRange = it.yearRange()
         onRangeSelected(it)
     }
@@ -133,7 +138,9 @@ class DateRangeSelectionRecyclerViewManager(recyclerView: RecyclerView,
     private class Adapter(val innerRecyclerManagers: List<InnerRecyclerViewManager>) :
         RecyclerView.Adapter<Adapter.ViewHolder>() {
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = ViewHolder(RecyclerView(parent.context))
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = ViewHolder(RecyclerView(parent.context).also {
+            it.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+        })
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             managerAt(position).recyclerView = holder.recyclerViewItem
@@ -172,7 +179,6 @@ private class InnerRecyclerViewManager(selectedDateRange: DateRange, private val
 
                 it.attachSnapHelperWithListener(PagerSnapHelper()) { position ->
                     selectedDateRange = recyclerViewAdapter.rangeAt(position)
-                    recyclerViewAdapter.update(selectedDateRange)
                     onRangeSelected(selectedDateRange)
                 }
             }
@@ -181,7 +187,11 @@ private class InnerRecyclerViewManager(selectedDateRange: DateRange, private val
     class Adapter(selectedRange: DateRange) : RecyclerView.Adapter<Adapter.ViewHolder>() {
         private var rangeOptions: List<DateRange> = selectedRange.stream()
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = ViewHolder(TextView(parent.context))
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = ViewHolder(
+            with(LayoutInflater.from(parent.context)) {
+                inflate(R.layout.large_centered_text_view, parent, false)
+            }.textView
+        )
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             holder.textView.text = with(rangeAt(position)) {
@@ -206,11 +216,11 @@ private class InnerRecyclerViewManager(selectedDateRange: DateRange, private val
         fun update(selectedRange: DateRange) {
             val updatedRangeOptions = selectedRange.stream()
             val diff = DiffUtil.calculateDiff(DiffCallback(rangeOptions, updatedRangeOptions), false)
-            diff.dispatchUpdatesTo(this)
             rangeOptions = updatedRangeOptions
+            diff.dispatchUpdatesTo(this)
         }
 
-        class DiffCallback(val newValues: List<DateRange>, val oldValues: List<DateRange>) : DiffUtil.Callback() {
+        class DiffCallback(val oldValues: List<DateRange>, val newValues: List<DateRange>) : DiffUtil.Callback() {
             override fun getOldListSize() = oldValues.size
             override fun getNewListSize() = newValues.size
             override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int) = oldValues[oldItemPosition] == newValues[newItemPosition]
