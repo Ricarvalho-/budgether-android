@@ -16,29 +16,30 @@ import java.util.*
 sealed class Period {
     abstract val dateRange: DateRange
 
-    fun stream(before: Int = 50, after: Int = 50) = List(before + 1 + after) { index ->
+    fun stream(before: Int = 25, after: Int = 25) = List(before + 1 + after) { index ->
         when (val relativePosition = index - before) {
             0 -> this
-            else -> byAdding(relativePosition)
+            else -> byOffsetting(relativePosition)
         }
     }
 
-    protected abstract fun byAdding(amount: Int): Period
+    protected abstract fun byOffsetting(amount: Int): Period
 
-    data class Year(private val value: Int): Period(), BaseCalendarProvider {
+    data class Year(val year: Int): Period(), BaseCalendarProvider {
         override val dateRange by lazy {
+            val calendar = baseCalendar()
             DateRange(
-                baseCalendar.apply { setAsFirst(Calendar.DAY_OF_YEAR) }.time,
-                baseCalendar.apply { setAsLast(Calendar.DAY_OF_YEAR) }.time
+                calendar.apply { setAsFirst(Calendar.DAY_OF_YEAR) }.time,
+                calendar.apply { setAsLast(Calendar.DAY_OF_YEAR) }.time
             )
         }
 
-        override val baseCalendar: Calendar = Calendar.getInstance().apply {
+        override fun baseCalendar(): Calendar = Calendar.getInstance().apply {
             clear()
-            set(Calendar.YEAR, value)
+            set(Calendar.YEAR, year)
         }
 
-        override fun byAdding(amount: Int) = Year(value + amount)
+        override fun byOffsetting(amount: Int) = Year(year + amount)
 
         companion object {
             val actual = Year(Calendar.getInstance().get(Calendar.YEAR))
@@ -46,20 +47,25 @@ sealed class Period {
     }
 
     data class Month(private val month: Int, val year: Year): Period(), BaseCalendarProvider {
-        init { require(month in year.baseCalendar.validRangeOf(Calendar.MONTH)) }
-
         override val dateRange by lazy {
+            val calendar = baseCalendar()
             DateRange(
-                baseCalendar.apply { setAsFirst(Calendar.DAY_OF_MONTH) }.time,
-                baseCalendar.apply { setAsLast(Calendar.DAY_OF_MONTH) }.time
+                calendar.apply { setAsFirst(Calendar.DAY_OF_MONTH) }.time,
+                calendar.apply { setAsLast(Calendar.DAY_OF_MONTH) }.time
             )
         }
 
-        override val baseCalendar: Calendar = year.baseCalendar.apply {
-            set(Calendar.MONTH, month)
-        }
+        override fun baseCalendar(): Calendar = year.baseCalendar().apply { set(Calendar.MONTH, month) }
 
-        override fun byAdding(amount: Int) = Month(month + amount, year)
+        override fun byOffsetting(amount: Int): Period {
+            val target = month + amount
+            val maxValue = year.baseCalendar().getActualMaximum(Calendar.MONTH).inc()
+            val clampedValue = target % maxValue
+            val overflow = target / maxValue
+            val normalizedClampedValue = if (clampedValue < 0) maxValue + clampedValue else clampedValue
+            val normalizedOverflow = if (clampedValue < 0) overflow.dec() else overflow
+            return Month(normalizedClampedValue, Year(year.year + normalizedOverflow))
+        }
 
         fun sameMonthAt(anotherYear: Year) = Month(month, anotherYear)
 
@@ -70,15 +76,14 @@ sealed class Period {
 
     protected fun Calendar.setAsFirst(field: Int) = set(field, getActualMinimum(field))
     protected fun Calendar.setAsLast(field: Int) = set(field, getActualMaximum(field))
-    protected fun Calendar.validRangeOf(field: Int) = getActualMinimum(field)..getActualMaximum(field)
 
-    private interface BaseCalendarProvider { val baseCalendar: Calendar }
+    private interface BaseCalendarProvider { fun baseCalendar(): Calendar }
     data class DateRange(val start: Date, val end: Date)
 }
 
-class DateRangeSelectionRecyclerViewManager(recyclerView: RecyclerView,
-                                            private val selectedPeriod: Period = Period.Month.actual,
-                                            var onPeriodSelected: (Period) -> Unit) {
+class DatePeriodSelectionRecyclerViewManager(recyclerView: RecyclerView,
+                                             private val selectedPeriod: Period = Period.Month.actual,
+                                             var onPeriodSelected: (Period) -> Unit) {
 
     private val yearManager: PeriodRecyclerViewManager<Period.Year> = PeriodRecyclerViewManager(
         selectedPeriod.let { when (it) {
