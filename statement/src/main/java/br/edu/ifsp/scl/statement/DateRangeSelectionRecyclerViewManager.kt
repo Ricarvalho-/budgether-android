@@ -10,10 +10,8 @@ import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import br.edu.ifsp.scl.common.MarginItemDecoration
 import br.edu.ifsp.scl.common.attachSnapHelperWithListener
-import br.edu.ifsp.scl.common.shortFormatted
 import kotlinx.android.synthetic.main.large_centered_text_view.view.*
 import java.util.*
-import java.util.concurrent.TimeUnit
 
 sealed class Period {
     abstract val dateRange: DateRange
@@ -27,7 +25,7 @@ sealed class Period {
 
     protected abstract fun byAdding(amount: Int): Period
 
-    class Year(private val value: Int): Period(), BaseCalendarProvider {
+    data class Year(private val value: Int): Period(), BaseCalendarProvider {
         override val dateRange by lazy {
             DateRange(
                 baseCalendar.apply { setAsFirst(Calendar.DAY_OF_YEAR) }.time,
@@ -47,7 +45,7 @@ sealed class Period {
         }
     }
 
-    class Month(private val month: Int, private val year: Year): Period(), BaseCalendarProvider {
+    data class Month(private val month: Int, val year: Year): Period(), BaseCalendarProvider {
         init { require(month in year.baseCalendar.validRangeOf(Calendar.MONTH)) }
 
         override val dateRange by lazy {
@@ -75,101 +73,31 @@ sealed class Period {
     protected fun Calendar.validRangeOf(field: Int) = getActualMinimum(field)..getActualMaximum(field)
 
     private interface BaseCalendarProvider { val baseCalendar: Calendar }
+    data class DateRange(val start: Date, val end: Date)
 }
-
-data class DateRange(val start: Date, val end: Date) {
-    companion object {
-        fun actualMonthRange() = Date().let {
-            DateRange(
-                it.asFirst(Calendar.DAY_OF_MONTH).clearingUndesiredFields(),
-                it.asLast(Calendar.DAY_OF_MONTH).clearingUndesiredFields()
-            )
-        }
-
-        private val Date.calendar: Calendar get() = Calendar.getInstance().also{ it.time = this }
-        private fun Date.byAdding(field: Int, amount: Int) = calendar.apply { add(field, amount) }.time
-        private fun Date.asFirst(field: Int) = calendar.apply { set(field, getActualMinimum(field)) }.time
-        private fun Date.asLast(field: Int) = calendar.apply { set(field, getActualMaximum(field)) }.time
-        private fun Date.isFirst(field: Int) = with(calendar) { get(field) == getActualMinimum(field) }
-        private fun Date.isLast(field: Int) = with(calendar) { get(field) == getActualMaximum(field) }
-        private fun Date.isSameAs(other: Date, field: Int) = calendar.get(field) == other.calendar.get(field)
-        private fun Date.clearingUndesiredFields() = calendar.apply {
-            clear(Calendar.HOUR)
-            clear(Calendar.HOUR_OF_DAY)
-            clear(Calendar.MINUTE)
-            clear(Calendar.SECOND)
-            clear(Calendar.MILLISECOND)
-        }.time
-    }
-
-    val isYear by lazy {
-        return@lazy when {
-            !start.isSameAs(end, Calendar.YEAR) -> false
-            !start.isFirst(Calendar.DAY_OF_YEAR) -> false
-            !end.isLast(Calendar.DAY_OF_YEAR) -> false
-            else -> true
-        }
-    }
-
-    val isMonth by lazy {
-        return@lazy when {
-            !start.isSameAs(end, Calendar.YEAR) -> false
-            !start.isSameAs(end, Calendar.MONTH) -> false
-            !start.isFirst(Calendar.DAY_OF_MONTH) -> false
-            !end.isLast(Calendar.DAY_OF_MONTH) -> false
-            else -> true
-        }
-    }
-
-    private val daysInterval by lazy {
-        val millisDiff = end.calendar.timeInMillis - start.calendar.timeInMillis
-        TimeUnit.MILLISECONDS.toDays(millisDiff).toInt()
-    }
-
-    fun yearRange() = DateRange(start.asFirst(Calendar.DAY_OF_YEAR), end.asLast(Calendar.DAY_OF_YEAR))
-    fun atYearOf(reference: DateRange) = DateRange(
-        start.calendar.apply { set(Calendar.YEAR, reference.start.calendar.get(Calendar.YEAR)) }.time,
-        end.calendar.apply { set(Calendar.YEAR, reference.end.calendar.get(Calendar.YEAR)) }.time
-    )
-
-    fun stream(before: Int = 50, after: Int = 50) = List(before + 1 + after) { index ->
-        val relativePosition = index - before
-        when {
-            relativePosition == 0 -> this
-            isYear -> DateRange(
-                start.byAdding(Calendar.YEAR, relativePosition).asFirst(Calendar.DAY_OF_YEAR),
-                end.byAdding(Calendar.YEAR, relativePosition).asLast(Calendar.DAY_OF_YEAR)
-            )
-            isMonth -> DateRange(
-                start.byAdding(Calendar.MONTH, relativePosition).asFirst(Calendar.DAY_OF_MONTH),
-                end.byAdding(Calendar.MONTH, relativePosition).asLast(Calendar.DAY_OF_MONTH)
-            )
-            else -> DateRange(
-                start.byAdding(Calendar.DATE, daysInterval * relativePosition),
-                end.byAdding(Calendar.DATE, daysInterval * relativePosition)
-            )
-        }
-    }
-}
-
-typealias OnDateRangeSelectedCallback = (DateRange) -> Unit
 
 class DateRangeSelectionRecyclerViewManager(recyclerView: RecyclerView,
-                                            private val selectedDateRange: DateRange = DateRange.actualMonthRange(),
-                                            var onRangeSelected: OnDateRangeSelectedCallback) {
+                                            private val selectedPeriod: Period = Period.Month.actual,
+                                            var onPeriodSelected: (Period) -> Unit) {
 
-    private val yearManager: InnerRecyclerViewManager = InnerRecyclerViewManager(selectedDateRange.yearRange()) {
-        val selectedMonthAtSelectedYear = monthManager.selectedDateRange.atYearOf(it)
-        monthManager.selectedDateRange = selectedMonthAtSelectedYear
-        onRangeSelected(it)
+    private val yearManager: PeriodRecyclerViewManager<Period.Year> = PeriodRecyclerViewManager(
+        selectedPeriod.let { when (it) {
+            is Period.Year -> it
+            is Period.Month -> it.year
+        }}
+    ) {
+        monthManager.selectedPeriod = monthManager.selectedPeriod.sameMonthAt(it)
+        onPeriodSelected(it)
     }
 
-    private val monthManager = InnerRecyclerViewManager(selectedDateRange.let { when {
-        it.isMonth -> it
-        else -> DateRange.actualMonthRange().atYearOf(it)
-    }}) {
-        yearManager.selectedDateRange = it.yearRange()
-        onRangeSelected(it)
+    private val monthManager = PeriodRecyclerViewManager(
+        selectedPeriod.let { when (it) {
+            is Period.Month -> it
+            is Period.Year -> Period.Month.actual.sameMonthAt(it)
+        }}
+    ) {
+        yearManager.selectedPeriod = it.year
+        onPeriodSelected(it)
     }
 
     private val recyclerViewAdapter = Adapter(listOf(yearManager, monthManager))
@@ -182,22 +110,19 @@ class DateRangeSelectionRecyclerViewManager(recyclerView: RecyclerView,
             val margin = it.resources.getDimension(R.dimen.date_range_selection_item_vertical_margin)
             it.addItemDecoration(MarginItemDecoration(margin.toInt()))
         }.run {
-            scrollToPosition(with(selectedDateRange) {
-                when {
-                    isYear -> recyclerViewAdapter.positionOf(yearManager)
-                    isMonth -> recyclerViewAdapter.positionOf(monthManager)
-                    else -> RecyclerView.NO_POSITION
-                }
+            scrollToPosition(when (selectedPeriod) {
+                is Period.Year -> recyclerViewAdapter.positionOf(yearManager)
+                is Period.Month -> recyclerViewAdapter.positionOf(monthManager)
             })
 
             attachSnapHelperWithListener(PagerSnapHelper()) { position ->
                 val activeManager = recyclerViewAdapter.managerAt(position)
-                onRangeSelected(activeManager.selectedDateRange)
+                onPeriodSelected(activeManager.selectedPeriod)
             }
         }
     }
 
-    private class Adapter(val innerRecyclerManagers: List<InnerRecyclerViewManager>) :
+    private class Adapter(val innerRecyclerManagers: List<PeriodRecyclerViewManager<*>>) :
         RecyclerView.Adapter<Adapter.ViewHolder>() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = ViewHolder(RecyclerView(parent.context).also {
@@ -210,16 +135,16 @@ class DateRangeSelectionRecyclerViewManager(recyclerView: RecyclerView,
 
         override fun getItemCount() = innerRecyclerManagers.size
         fun managerAt(position: Int) = innerRecyclerManagers[position]
-        fun positionOf(manager: InnerRecyclerViewManager) = innerRecyclerManagers.indexOf(manager)
+        fun positionOf(manager: PeriodRecyclerViewManager<*>) = innerRecyclerManagers.indexOf(manager)
 
         class ViewHolder(val recyclerViewItem: RecyclerView) : RecyclerView.ViewHolder(recyclerViewItem)
     }
 }
 
-private class InnerRecyclerViewManager(selectedDateRange: DateRange, private val onRangeSelected: OnDateRangeSelectedCallback) {
-    private val recyclerViewAdapter = Adapter(selectedDateRange)
+private class PeriodRecyclerViewManager<P : Period>(selectedPeriod: P, private val onPeriodSelected: (P) -> Unit) {
+    private val recyclerViewAdapter = Adapter(selectedPeriod)
 
-    var selectedDateRange = selectedDateRange
+    var selectedPeriod = selectedPeriod
         set(value) {
             field = value.also {
                 recyclerViewAdapter.update(it)
@@ -237,17 +162,17 @@ private class InnerRecyclerViewManager(selectedDateRange: DateRange, private val
                 val margin = it.resources.getDimension(R.dimen.date_range_selection_item_horizontal_margin)
                 it.addItemDecoration(MarginItemDecoration(margin.toInt()))
 
-                it.scrollToPosition(recyclerViewAdapter.positionOf(selectedDateRange))
+                it.scrollToPosition(recyclerViewAdapter.positionOf(selectedPeriod))
 
                 it.attachSnapHelperWithListener(PagerSnapHelper()) { position ->
-                    selectedDateRange = recyclerViewAdapter.rangeAt(position)
-                    onRangeSelected(selectedDateRange)
+                    selectedPeriod = recyclerViewAdapter.periodAt(position) as P
+                    onPeriodSelected(selectedPeriod)
                 }
             }
         }
 
-    class Adapter(selectedRange: DateRange) : RecyclerView.Adapter<Adapter.ViewHolder>() {
-        private var rangeOptions: List<DateRange> = selectedRange.stream()
+    class Adapter<P : Period>(selectedPeriod: P) : RecyclerView.Adapter<Adapter.ViewHolder>() {
+        private var periodOptions = selectedPeriod.stream()
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = ViewHolder(
             with(LayoutInflater.from(parent.context)) {
@@ -256,33 +181,29 @@ private class InnerRecyclerViewManager(selectedDateRange: DateRange, private val
         )
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            holder.textView.text = with(rangeAt(position)) {
-                val context = holder.textView.context
-                fun bestFormatted(skeleton: String) =
-                    DateFormat.format(
-                        DateFormat.getBestDateTimePattern(Locale.getDefault(), skeleton),
-                        start
-                    )
-                when {
-                    isYear -> bestFormatted("yyyy")
-                    isMonth -> bestFormatted("MMM yyyy")
-                    else -> "${start.shortFormatted(context)} - ${end.shortFormatted(context)}"
-                }
+            val period = periodAt(position)
+            fun bestFormatted(skeleton: String) = DateFormat.format(
+                DateFormat.getBestDateTimePattern(Locale.getDefault(), skeleton),
+                period.dateRange.start
+            )
+            holder.textView.text = when (period) {
+                is Period.Year -> bestFormatted("yyyy")
+                is Period.Month -> bestFormatted("MMM yyyy")
             }
         }
 
-        override fun getItemCount() = rangeOptions.size
-        fun rangeAt(position: Int) = rangeOptions[position]
-        fun positionOf(range: DateRange) = rangeOptions.indexOf(range)
+        override fun getItemCount() = periodOptions.size
+        fun periodAt(position: Int) = periodOptions[position]
+        fun positionOf(period: P) = periodOptions.indexOf(period)
 
-        fun update(selectedRange: DateRange) {
-            val updatedRangeOptions = selectedRange.stream()
-            val diff = DiffUtil.calculateDiff(DiffCallback(rangeOptions, updatedRangeOptions), false)
-            rangeOptions = updatedRangeOptions
+        fun update(selectedPeriod: P) {
+            val updatedPeriodOptions = selectedPeriod.stream()
+            val diff = DiffUtil.calculateDiff(DiffCallback(periodOptions, updatedPeriodOptions), false)
+            periodOptions = updatedPeriodOptions
             diff.dispatchUpdatesTo(this)
         }
 
-        class DiffCallback(val oldValues: List<DateRange>, val newValues: List<DateRange>) : DiffUtil.Callback() {
+        class DiffCallback(val oldValues: List<Period>, val newValues: List<Period>) : DiffUtil.Callback() {
             override fun getOldListSize() = oldValues.size
             override fun getNewListSize() = newValues.size
             override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int) = oldValues[oldItemPosition] == newValues[newItemPosition]
