@@ -15,6 +15,68 @@ import kotlinx.android.synthetic.main.large_centered_text_view.view.*
 import java.util.*
 import java.util.concurrent.TimeUnit
 
+sealed class Period {
+    abstract val dateRange: DateRange
+
+    fun stream(before: Int = 50, after: Int = 50) = List(before + 1 + after) { index ->
+        when (val relativePosition = index - before) {
+            0 -> this
+            else -> byAdding(relativePosition)
+        }
+    }
+
+    protected abstract fun byAdding(amount: Int): Period
+
+    class Year(private val value: Int): Period(), BaseCalendarProvider {
+        override val dateRange by lazy {
+            DateRange(
+                baseCalendar.apply { setAsFirst(Calendar.DAY_OF_YEAR) }.time,
+                baseCalendar.apply { setAsLast(Calendar.DAY_OF_YEAR) }.time
+            )
+        }
+
+        override val baseCalendar: Calendar = Calendar.getInstance().apply {
+            clear()
+            set(Calendar.YEAR, value)
+        }
+
+        override fun byAdding(amount: Int) = Year(value + amount)
+
+        companion object {
+            val actual = Year(Calendar.getInstance().get(Calendar.YEAR))
+        }
+    }
+
+    class Month(private val month: Int, private val year: Year): Period(), BaseCalendarProvider {
+        init { require(month in year.baseCalendar.validRangeOf(Calendar.MONTH)) }
+
+        override val dateRange by lazy {
+            DateRange(
+                baseCalendar.apply { setAsFirst(Calendar.DAY_OF_MONTH) }.time,
+                baseCalendar.apply { setAsLast(Calendar.DAY_OF_MONTH) }.time
+            )
+        }
+
+        override val baseCalendar: Calendar = year.baseCalendar.apply {
+            set(Calendar.MONTH, month)
+        }
+
+        override fun byAdding(amount: Int) = Month(month + amount, year)
+
+        fun sameMonthAt(anotherYear: Year) = Month(month, anotherYear)
+
+        companion object {
+            val actual = Month(Calendar.getInstance().get(Calendar.MONTH), Year.actual)
+        }
+    }
+
+    protected fun Calendar.setAsFirst(field: Int) = set(field, getActualMinimum(field))
+    protected fun Calendar.setAsLast(field: Int) = set(field, getActualMaximum(field))
+    protected fun Calendar.validRangeOf(field: Int) = getActualMinimum(field)..getActualMaximum(field)
+
+    private interface BaseCalendarProvider { val baseCalendar: Calendar }
+}
+
 data class DateRange(val start: Date, val end: Date) {
     companion object {
         fun actualMonthRange() = Date().let {
