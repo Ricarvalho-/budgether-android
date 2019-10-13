@@ -1,2 +1,2 @@
-include ':app', ':common'
+include ':app', ':common', ':balanceinferencer'
 rootProject.name='Budgether'
