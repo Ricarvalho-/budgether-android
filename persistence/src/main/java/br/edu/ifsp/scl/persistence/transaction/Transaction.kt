@@ -46,7 +46,16 @@ sealed class Transaction : TransactionData {
     data class Transference(
         @Embedded val data: Data, val destinationAccountId: Long,
         @PrimaryKey(autoGenerate = true) val id: Long = 0
-    ) : Transaction(), TransactionData by data
+    ) : Transaction(), TransactionData by data {
+
+        infix fun kindRelativeTo(account: Account) = when(account.id) {
+            accountId -> RelativeKind.Sent
+            destinationAccountId -> RelativeKind.Received
+            else -> RelativeKind.Unrelated
+        }
+
+        enum class RelativeKind { Sent, Received, Unrelated }
+    }
 
     enum class Frequency { Single, Daily, Weekly, Monthly, Yearly }
 }
