@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "0d088ec704cf2d51774f5f39786a1eee",
+    "identityHash": "891e33c1f75c637a64100ac4805459fc",
     "entities": [
       {
         "tableName": "Account",
@@ -90,6 +90,22 @@
           "autoGenerate": true
         },
         "indices": [
+          {
+            "name": "index_Credit_title",
+            "unique": false,
+            "columnNames": [
+              "title"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_Credit_title` ON `${TABLE_NAME}` (`title`)"
+          },
+          {
+            "name": "index_Credit_category",
+            "unique": false,
+            "columnNames": [
+              "category"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_Credit_category` ON `${TABLE_NAME}` (`category`)"
+          },
           {
             "name": "index_Credit_date",
             "unique": false,
@@ -181,6 +197,22 @@
           "autoGenerate": true
         },
         "indices": [
+          {
+            "name": "index_Debit_title",
+            "unique": false,
+            "columnNames": [
+              "title"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_Debit_title` ON `${TABLE_NAME}` (`title`)"
+          },
+          {
+            "name": "index_Debit_category",
+            "unique": false,
+            "columnNames": [
+              "category"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_Debit_category` ON `${TABLE_NAME}` (`category`)"
+          },
           {
             "name": "index_Debit_date",
             "unique": false,
@@ -287,6 +319,22 @@
             "createSql": "CREATE INDEX IF NOT EXISTS `index_Transference_destinationAccountId` ON `${TABLE_NAME}` (`destinationAccountId`)"
           },
           {
+            "name": "index_Transference_title",
+            "unique": false,
+            "columnNames": [
+              "title"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_Transference_title` ON `${TABLE_NAME}` (`title`)"
+          },
+          {
+            "name": "index_Transference_category",
+            "unique": false,
+            "columnNames": [
+              "category"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_Transference_category` ON `${TABLE_NAME}` (`category`)"
+          },
+          {
             "name": "index_Transference_date",
             "unique": false,
             "columnNames": [
@@ -332,7 +380,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0d088ec704cf2d51774f5f39786a1eee')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '891e33c1f75c637a64100ac4805459fc')"
     ]
   }
 }

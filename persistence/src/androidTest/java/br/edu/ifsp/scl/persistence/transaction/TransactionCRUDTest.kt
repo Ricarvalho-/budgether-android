@@ -128,8 +128,7 @@ class TransactionCRUDTest {
             it shouldBeEqualTo originalTransaction
         }
 
-        val updatedTransaction = originalTransaction.copy(
-            data = originalTransaction.data.copy(title = "Updated"))
+        val updatedTransaction = originalTransaction.copy(originalTransaction.data.copy("Updated"))
         transactionDao.update(updatedTransaction)
         transactionDao.allTransactions().observedValue?.first()?.let {
             it shouldBeDifferentFrom originalTransaction
@@ -166,5 +165,39 @@ class TransactionCRUDTest {
 
         transactionDao.allTransactions().observedValue?.shouldContain(credit, debit)
         transactionDao.allTransactions().observedValue?.shouldNotContain(transference)
+    }
+
+    @Test
+    fun insertedTitlesShouldAppearInSelect() {
+        Transaction.Credit(sampleData.copy("b")).afterInsert()
+        Transaction.Credit(sampleData.copy("b")).afterInsert()
+        Transaction.Credit(sampleData.copy("a")).afterInsert()
+
+        transactionDao.allCreditTitles().observedValue?.shouldBeEqualTo(listOf("a", "b"))
+        transactionDao.allCreditTitles("a").observedValue?.shouldBeEqualTo(listOf("a"))
+    }
+
+    @Test
+    fun insertedCategoriesShouldAppearInSelect() {
+        Transaction.Credit(sampleData.copy(category = "b")).afterInsert()
+        Transaction.Credit(sampleData.copy(category = "b")).afterInsert()
+        Transaction.Credit(sampleData.copy(category = "a")).afterInsert()
+
+        transactionDao.allCreditCategories().observedValue?.shouldBeEqualTo(listOf("a", "b"))
+        transactionDao.allCreditCategories("a").observedValue?.shouldBeEqualTo(listOf("a"))
+    }
+
+    @Test
+    fun insertedCategoriesShouldAppearInSelectOfAssociatedAccounts() {
+        Transaction.Credit(sampleData.copy(category = "b")).afterInsert()
+        Transaction.Credit(sampleData.copy(category = "a")).afterInsert()
+        Transaction.Credit(sampleData.copy(category = "a")).afterInsert()
+        Transaction.Debit(sampleData.copy(category = "b")).afterInsert()
+        Transaction.Debit(sampleData.copy(category = "a", accountId = sampleSecondAccount.id)).afterInsert()
+        Transaction.Debit(sampleData.copy(category = "a", accountId = sampleSecondAccount.id)).afterInsert()
+
+        transactionDao.allTransactionCategories().observedValue?.shouldBeEqualTo(listOf("a", "b"))
+        transactionDao.allTransactionCategoriesOfAccount(sampleSecondAccount.id)
+            .observedValue?.shouldBeEqualTo(listOf("a"))
     }
 }

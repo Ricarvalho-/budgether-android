@@ -5,7 +5,7 @@ import androidx.room.ForeignKey.CASCADE
 import br.edu.ifsp.scl.persistence.account.Account
 import java.util.*
 
-@Entity(indices = [Index("date"), Index("accountId")])
+@Entity(indices = [Index("title"), Index("category"), Index("date"), Index("accountId")])
 sealed class Transaction : TransactionData {
     data class Data(
         override val title: String,

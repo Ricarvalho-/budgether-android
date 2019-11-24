@@ -34,6 +34,30 @@ interface TransactionDao {
     @Query("select * from Transference where accountId = :accountId or destinationAccountId = :accountId")
     fun allTransferenceTransactionsOfAccount(accountId: Long): LiveData<List<Transaction.Transference>>
 
+    @Query("select distinct title from Credit where title like '%'||:like||'%' order by title")
+    fun allCreditTitles(like: String = ""): LiveData<List<String>>
+
+    @Query("select distinct title from Debit where title like '%'||:like||'%' order by title")
+    fun allDebitTitles(like: String = ""): LiveData<List<String>>
+
+    @Query("select distinct title from Transference where title like '%'||:like||'%' order by title")
+    fun allTransferenceTitles(like: String = ""): LiveData<List<String>>
+
+    @Query("select distinct category from Credit where category like '%'||:like||'%' order by category")
+    fun allCreditCategories(like: String = ""): LiveData<List<String>>
+
+    @Query("select distinct category from Debit where category like '%'||:like||'%' order by category")
+    fun allDebitCategories(like: String = ""): LiveData<List<String>>
+
+    @Query("select distinct category from Transference where category like '%'||:like||'%' order by category")
+    fun allTransferenceCategories(like: String = ""): LiveData<List<String>>
+
+    @Query("select category from Credit union select category from Debit union select category from Transference order by category")
+    fun allTransactionCategories(): LiveData<List<String>>
+
+    @Query("select category from Credit where accountId = :accountId union select category from Debit where accountId = :accountId union select category from Transference where accountId = :accountId or destinationAccountId = :accountId order by category")
+    fun allTransactionCategoriesOfAccount(accountId: Long): LiveData<List<String>>
+
     @Update
     fun update(credit: Transaction.Credit)
 
