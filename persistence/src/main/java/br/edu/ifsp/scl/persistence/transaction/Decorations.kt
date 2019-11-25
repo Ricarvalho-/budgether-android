@@ -12,6 +12,11 @@ infix fun <T : Transaction> LiveData<List<T>>.before(date: Date) = Transformatio
         .sortedBy { it.atDate }
 } as LiveData<List<RepeatingTransaction>>
 
+infix fun <T : Transaction> LiveData<List<T>>.affecting(dateRange: Range<Date>) = Transformations.map(this) { items ->
+    items.flatMap { it.repeatWhileAffecting(dateRange) }
+        .sortedBy { it.atDate }
+} as LiveData<List<RepeatingTransaction>>
+
 private infix fun Transaction.repeatWhileAffecting(dateRange: Range<Date>) = sequence {
     var currentDate = startDate
     var currentRepetition = 1

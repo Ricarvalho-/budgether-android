@@ -1,6 +1,7 @@
 package br.edu.ifsp.scl.persistence.transaction
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.core.util.rangeTo
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import br.edu.ifsp.scl.persistence.observedValue
@@ -154,5 +155,81 @@ class DecorationsTest {
             RepeatingTransaction(credit, date(29, 2, 2020), 4),
             RepeatingTransaction(credit, date(30, 3, 2020), 5)
         ))
+    }
+
+    @Test
+    fun transactionStartingBeforeButNotAffectingDateRange() {
+        val credit = Transaction.Credit(sampleData(
+            frequency = Transaction.Frequency.Daily,
+            repeat = 3
+        ))
+
+        val transactions = liveDataListWith(credit)
+        transactions.affecting(
+            date(5, 1, 2020) rangeTo date(10, 1, 2020)
+        ).observedValue?.let { assert(it.isEmpty()) }
+    }
+
+    @Test
+    fun transactionStartingBeforeAndAffectingDateRange() {
+        val credit = Transaction.Credit(sampleData(
+            frequency = Transaction.Frequency.Weekly,
+            repeat = 3
+        ))
+
+        val transactions = liveDataListWith(credit)
+        transactions.affecting(
+            date(5, 1, 2020) rangeTo date(15, 1, 2020)
+        ).observedValue?.shouldBeEqualTo(listOf(
+            RepeatingTransaction(credit, date(8, 1, 2020), 2),
+            RepeatingTransaction(credit, date(15, 1, 2020), 3)
+        ))
+    }
+
+    @Test
+    fun transactionInsideDateRange() {
+        val credit = Transaction.Credit(sampleData(
+            frequency = Transaction.Frequency.Daily,
+            repeat = 3
+        ))
+
+        val transactions = liveDataListWith(credit)
+        transactions.affecting(
+            date(1, 1, 2020) rangeTo date(10, 1, 2020)
+        ).observedValue?.shouldBeEqualTo(listOf(
+            RepeatingTransaction(credit, date(1, 1, 2020), 1),
+            RepeatingTransaction(credit, date(2, 1, 2020), 2),
+            RepeatingTransaction(credit, date(3, 1, 2020), 3)
+        ))
+    }
+
+    @Test
+    fun transactionStartingAtButEndingOutsideOfDateRange() {
+        val credit = Transaction.Credit(sampleData(
+            frequency = Transaction.Frequency.Weekly,
+            repeat = 3
+        ))
+
+        val transactions = liveDataListWith(credit)
+        transactions.affecting(
+            date(1, 1, 2020) rangeTo date(10, 1, 2020)
+        ).observedValue?.shouldBeEqualTo(listOf(
+            RepeatingTransaction(credit, date(1, 1, 2020), 1),
+            RepeatingTransaction(credit, date(8, 1, 2020), 2)
+        ))
+    }
+
+    @Test
+    fun transactionStartingAfterDateRange() {
+        val credit = Transaction.Credit(sampleData(
+            startDate = date(20, 1, 2020),
+            frequency = Transaction.Frequency.Daily,
+            repeat = 3
+        ))
+
+        val transactions = liveDataListWith(credit)
+        transactions.affecting(
+            date(1, 1, 2020) rangeTo date(10, 1, 2020)
+        ).observedValue?.let { assert(it.isEmpty()) }
     }
 }
