@@ -1,9 +1,11 @@
 package br.edu.ifsp.scl.statement
 
 import android.text.format.DateFormat
+import android.util.Range
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.util.rangeTo
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
@@ -14,7 +16,7 @@ import kotlinx.android.synthetic.main.large_centered_text_view.view.*
 import java.util.*
 
 sealed class Period {
-    abstract val dateRange: DateRange
+    abstract val dateRange: Range<Date>
 
     fun stream(before: Int = 25, after: Int = 25) = List(before + 1 + after) { index ->
         when (val relativePosition = index - before) {
@@ -27,14 +29,12 @@ sealed class Period {
 
     data class Year(val year: Int): Period(), BaseCalendarProvider {
         override val dateRange by lazy {
-            val calendar = baseCalendar()
-            DateRange(
-                calendar.apply { setAsFirst(Calendar.DAY_OF_YEAR) }.time,
-                calendar.apply { setAsLast(Calendar.DAY_OF_YEAR) }.time
-            )
+            val start = baseCalendar.apply { setAsFirst(Calendar.DAY_OF_YEAR) }.time
+            val end = baseCalendar.apply { setAsLast(Calendar.DAY_OF_YEAR) }.time
+            start rangeTo end
         }
 
-        override fun baseCalendar(): Calendar = Calendar.getInstance().apply {
+        override val baseCalendar: Calendar get() = Calendar.getInstance().apply {
             clear()
             set(Calendar.YEAR, year)
         }
@@ -48,18 +48,16 @@ sealed class Period {
 
     data class Month(private val month: Int, val year: Year): Period(), BaseCalendarProvider {
         override val dateRange by lazy {
-            val calendar = baseCalendar()
-            DateRange(
-                calendar.apply { setAsFirst(Calendar.DAY_OF_MONTH) }.time,
-                calendar.apply { setAsLast(Calendar.DAY_OF_MONTH) }.time
-            )
+            val first = baseCalendar.apply { setAsFirst(Calendar.DAY_OF_MONTH) }.time
+            val last = baseCalendar.apply { setAsLast(Calendar.DAY_OF_MONTH) }.time
+            first rangeTo last
         }
 
-        override fun baseCalendar(): Calendar = year.baseCalendar().apply { set(Calendar.MONTH, month) }
+        override val baseCalendar: Calendar get() = year.baseCalendar.apply { set(Calendar.MONTH, month) }
 
         override fun byOffsetting(amount: Int): Period {
             val target = month + amount
-            val maxValue = year.baseCalendar().getActualMaximum(Calendar.MONTH).inc()
+            val maxValue = year.baseCalendar.getActualMaximum(Calendar.MONTH).inc()
             val clampedValue = target % maxValue
             val overflow = target / maxValue
             val normalizedClampedValue = if (clampedValue < 0) maxValue + clampedValue else clampedValue
@@ -77,8 +75,7 @@ sealed class Period {
     protected fun Calendar.setAsFirst(field: Int) = set(field, getActualMinimum(field))
     protected fun Calendar.setAsLast(field: Int) = set(field, getActualMaximum(field))
 
-    private interface BaseCalendarProvider { fun baseCalendar(): Calendar }
-    data class DateRange(val start: Date, val end: Date)
+    private interface BaseCalendarProvider { val baseCalendar: Calendar }
 }
 
 class DatePeriodSelectionRecyclerViewManager(recyclerView: RecyclerView,
@@ -189,7 +186,7 @@ private class PeriodRecyclerViewManager<P : Period>(selectedPeriod: P, private v
             val period = periodAt(position)
             fun bestFormatted(skeleton: String) = DateFormat.format(
                 DateFormat.getBestDateTimePattern(Locale.getDefault(), skeleton),
-                period.dateRange.start
+                period.dateRange.lower
             )
             holder.textView.text = when (period) {
                 is Period.Year -> bestFormatted("yyyy")
