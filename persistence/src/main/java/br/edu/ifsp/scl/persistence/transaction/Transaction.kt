@@ -7,6 +7,12 @@ import java.util.*
 
 @Entity(indices = [Index("title"), Index("category"), Index("startDate"), Index("accountId")])
 sealed class Transaction : TransactionData {
+    companion object {
+        private const val indeterminateRepeat = 1
+    }
+
+    val isIndeterminate get() = repeat == indeterminateRepeat
+
     data class Data(
         override val title: String,
         override val category: String,
