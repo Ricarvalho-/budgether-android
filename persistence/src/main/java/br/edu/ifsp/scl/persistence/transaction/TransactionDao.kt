@@ -88,7 +88,7 @@ fun TransactionDao.allTransactions() = MediatorLiveData<List<Transaction>>().app
     var debits = listOf<Transaction.Debit>()
     var transferences = listOf<Transaction.Transference>()
 
-    fun sortedUnion() = (credits + debits + transferences).sortedBy { it.date }
+    fun sortedUnion() = (credits + debits + transferences).sortedBy { it.startDate }
 
     addSource(allCreditTransactions()) {
         credits = it
@@ -109,7 +109,7 @@ fun TransactionDao.allTransactionsOf(account: Account) = MediatorLiveData<List<T
     var debits = listOf<Transaction.Debit>()
     var transferences = listOf<Transaction.Transference>()
 
-    fun sortedUnion() = (credits + debits + transferences).sortedBy { it.date }
+    fun sortedUnion() = (credits + debits + transferences).sortedBy { it.startDate }
 
     addSource(allCreditTransactionsOfAccount(account.id)) {
         credits = it

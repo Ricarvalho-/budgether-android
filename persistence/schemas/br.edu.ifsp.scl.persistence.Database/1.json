@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "891e33c1f75c637a64100ac4805459fc",
+    "identityHash": "4a785c932eb11710816c3786bd6acd0c",
     "entities": [
       {
         "tableName": "Account",
@@ -32,7 +32,7 @@
       },
       {
         "tableName": "Credit",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT NOT NULL, `category` TEXT NOT NULL, `value` REAL NOT NULL, `date` INTEGER NOT NULL, `frequency` INTEGER NOT NULL, `repeat` INTEGER NOT NULL, `accountId` INTEGER NOT NULL, FOREIGN KEY(`accountId`) REFERENCES `Account`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT NOT NULL, `category` TEXT NOT NULL, `value` REAL NOT NULL, `startDate` INTEGER NOT NULL, `frequency` INTEGER NOT NULL, `repeat` INTEGER NOT NULL, `accountId` INTEGER NOT NULL, FOREIGN KEY(`accountId`) REFERENCES `Account`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "id",
@@ -59,8 +59,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "data.date",
-            "columnName": "date",
+            "fieldPath": "data.startDate",
+            "columnName": "startDate",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -107,12 +107,12 @@
             "createSql": "CREATE INDEX IF NOT EXISTS `index_Credit_category` ON `${TABLE_NAME}` (`category`)"
           },
           {
-            "name": "index_Credit_date",
+            "name": "index_Credit_startDate",
             "unique": false,
             "columnNames": [
-              "date"
+              "startDate"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_Credit_date` ON `${TABLE_NAME}` (`date`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_Credit_startDate` ON `${TABLE_NAME}` (`startDate`)"
           },
           {
             "name": "index_Credit_accountId",
@@ -139,7 +139,7 @@
       },
       {
         "tableName": "Debit",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT NOT NULL, `category` TEXT NOT NULL, `value` REAL NOT NULL, `date` INTEGER NOT NULL, `frequency` INTEGER NOT NULL, `repeat` INTEGER NOT NULL, `accountId` INTEGER NOT NULL, FOREIGN KEY(`accountId`) REFERENCES `Account`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT NOT NULL, `category` TEXT NOT NULL, `value` REAL NOT NULL, `startDate` INTEGER NOT NULL, `frequency` INTEGER NOT NULL, `repeat` INTEGER NOT NULL, `accountId` INTEGER NOT NULL, FOREIGN KEY(`accountId`) REFERENCES `Account`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "id",
@@ -166,8 +166,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "data.date",
-            "columnName": "date",
+            "fieldPath": "data.startDate",
+            "columnName": "startDate",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -214,12 +214,12 @@
             "createSql": "CREATE INDEX IF NOT EXISTS `index_Debit_category` ON `${TABLE_NAME}` (`category`)"
           },
           {
-            "name": "index_Debit_date",
+            "name": "index_Debit_startDate",
             "unique": false,
             "columnNames": [
-              "date"
+              "startDate"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_Debit_date` ON `${TABLE_NAME}` (`date`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_Debit_startDate` ON `${TABLE_NAME}` (`startDate`)"
           },
           {
             "name": "index_Debit_accountId",
@@ -246,7 +246,7 @@
       },
       {
         "tableName": "Transference",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`destinationAccountId` INTEGER NOT NULL, `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT NOT NULL, `category` TEXT NOT NULL, `value` REAL NOT NULL, `date` INTEGER NOT NULL, `frequency` INTEGER NOT NULL, `repeat` INTEGER NOT NULL, `accountId` INTEGER NOT NULL, FOREIGN KEY(`accountId`) REFERENCES `Account`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`destinationAccountId`) REFERENCES `Account`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`destinationAccountId` INTEGER NOT NULL, `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT NOT NULL, `category` TEXT NOT NULL, `value` REAL NOT NULL, `startDate` INTEGER NOT NULL, `frequency` INTEGER NOT NULL, `repeat` INTEGER NOT NULL, `accountId` INTEGER NOT NULL, FOREIGN KEY(`accountId`) REFERENCES `Account`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`destinationAccountId`) REFERENCES `Account`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "destinationAccountId",
@@ -279,8 +279,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "data.date",
-            "columnName": "date",
+            "fieldPath": "data.startDate",
+            "columnName": "startDate",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -335,12 +335,12 @@
             "createSql": "CREATE INDEX IF NOT EXISTS `index_Transference_category` ON `${TABLE_NAME}` (`category`)"
           },
           {
-            "name": "index_Transference_date",
+            "name": "index_Transference_startDate",
             "unique": false,
             "columnNames": [
-              "date"
+              "startDate"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_Transference_date` ON `${TABLE_NAME}` (`date`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_Transference_startDate` ON `${TABLE_NAME}` (`startDate`)"
           },
           {
             "name": "index_Transference_accountId",
@@ -380,7 +380,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '891e33c1f75c637a64100ac4805459fc')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4a785c932eb11710816c3786bd6acd0c')"
     ]
   }
 }
