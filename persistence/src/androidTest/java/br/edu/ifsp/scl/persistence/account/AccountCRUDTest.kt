@@ -1,17 +1,10 @@
 package br.edu.ifsp.scl.persistence.account
 
-import br.edu.ifsp.scl.persistence.DatabaseTest
-import br.edu.ifsp.scl.persistence.observedValue
-import br.edu.ifsp.scl.persistence.shouldBeDifferentFrom
-import br.edu.ifsp.scl.persistence.shouldBeEqualTo
+import br.edu.ifsp.scl.persistence.*
 import junit.framework.AssertionFailedError
 import org.junit.Test
 
 class AccountCRUDTest : DatabaseTest() {
-    private fun insertAccount(title: String = "Sample") = Account(title).run {
-        copy(id = accountDao.insert(this))
-    }
-
     @Test
     fun insertedAccountsShouldAppearInSelect() {
         val account1 = insertAccount()

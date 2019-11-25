@@ -2,42 +2,17 @@ package br.edu.ifsp.scl.persistence.transaction
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.core.util.rangeTo
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import br.edu.ifsp.scl.persistence.observedValue
-import br.edu.ifsp.scl.persistence.shouldBeEqualTo
+import br.edu.ifsp.scl.persistence.*
 import org.junit.Rule
 import org.junit.Test
-import java.util.*
 
 class DecorationsTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
 
-    private fun sampleData(
-        title: String = "Sample",
-        category: String = "Sample",
-        value: Double = 0.0,
-        startDate: Date = date(1, 1, 2020),
-        frequency: Transaction.Frequency = Transaction.Frequency.Single,
-        repeat: Int = 0,
-        accountId: Long = 0
-    ) = Transaction.Data(title, category, value, startDate, frequency, repeat, accountId)
-
-    private fun date(day: Int, month: Int, year: Int) = Calendar.getInstance().run {
-        clear()
-        set(year, month.dec(), day)
-        time
-    }
-
-    private fun <T> liveDataListWith(vararg values: T) =
-        MutableLiveData<List<T>>().apply {
-            value = values.asList()
-        } as LiveData<List<T>>
-
     @Test
     fun beforeShouldYieldOnlyResultsBeforeSpecifiedDate() {
-        val credit = Transaction.Credit(sampleData(
+        val credit = Transaction.Credit(sampleTransactionData(
             frequency = Transaction.Frequency.Weekly,
             repeat = 3
         ))
@@ -53,7 +28,7 @@ class DecorationsTest {
 
     @Test
     fun beforeShouldYieldInclusiveResults() {
-        val credit = Transaction.Credit(sampleData(
+        val credit = Transaction.Credit(sampleTransactionData(
             frequency = Transaction.Frequency.Weekly,
             repeat = 3
         ))
@@ -70,7 +45,7 @@ class DecorationsTest {
 
     @Test
     fun beforeShouldRespectRepeatability() {
-        val credit = Transaction.Credit(sampleData(
+        val credit = Transaction.Credit(sampleTransactionData(
             frequency = Transaction.Frequency.Weekly,
             repeat = 3
         ))
@@ -83,7 +58,7 @@ class DecorationsTest {
 
     @Test
     fun beforeShouldRespectFrequency() {
-        val credit = Transaction.Credit(sampleData(
+        val credit = Transaction.Credit(sampleTransactionData(
             frequency = Transaction.Frequency.Yearly,
             repeat = 2
         ))
@@ -99,9 +74,9 @@ class DecorationsTest {
 
     @Test
     fun beforeShouldYieldResultsOfMultipleTransactions() {
-        val credit = Transaction.Credit(sampleData())
-        val debit = Transaction.Debit(sampleData())
-        val sampleDate = sampleData().startDate
+        val credit = Transaction.Credit(sampleTransactionData())
+        val debit = Transaction.Debit(sampleTransactionData())
+        val sampleDate = sampleTransactionData().startDate
 
         val transactions = liveDataListWith(credit, debit)
         transactions.before(
@@ -114,13 +89,13 @@ class DecorationsTest {
 
     @Test
     fun beforeShouldYieldOrderedResults() {
-        val credit = Transaction.Credit(sampleData(
+        val credit = Transaction.Credit(sampleTransactionData(
             startDate = date(2, 2, 2020),
             frequency = Transaction.Frequency.Monthly,
             repeat = 2
         ))
 
-        val debit = Transaction.Debit(sampleData(
+        val debit = Transaction.Debit(sampleTransactionData(
             frequency = Transaction.Frequency.Monthly,
             repeat = 3
         ))
@@ -139,7 +114,7 @@ class DecorationsTest {
 
     @Test
     fun beforeShouldYieldMostReasonableResultsForNonexistentDates() {
-        val credit = Transaction.Credit(sampleData(
+        val credit = Transaction.Credit(sampleTransactionData(
             startDate = date(30, 11, 2019),
             frequency = Transaction.Frequency.Monthly,
             repeat = 5
@@ -159,7 +134,7 @@ class DecorationsTest {
 
     @Test
     fun transactionStartingBeforeButNotAffectingDateRange() {
-        val credit = Transaction.Credit(sampleData(
+        val credit = Transaction.Credit(sampleTransactionData(
             frequency = Transaction.Frequency.Daily,
             repeat = 3
         ))
@@ -172,7 +147,7 @@ class DecorationsTest {
 
     @Test
     fun transactionStartingBeforeAndAffectingDateRange() {
-        val credit = Transaction.Credit(sampleData(
+        val credit = Transaction.Credit(sampleTransactionData(
             frequency = Transaction.Frequency.Weekly,
             repeat = 3
         ))
@@ -188,7 +163,7 @@ class DecorationsTest {
 
     @Test
     fun transactionInsideDateRange() {
-        val credit = Transaction.Credit(sampleData(
+        val credit = Transaction.Credit(sampleTransactionData(
             frequency = Transaction.Frequency.Daily,
             repeat = 3
         ))
@@ -205,7 +180,7 @@ class DecorationsTest {
 
     @Test
     fun transactionStartingAtButEndingOutsideOfDateRange() {
-        val credit = Transaction.Credit(sampleData(
+        val credit = Transaction.Credit(sampleTransactionData(
             frequency = Transaction.Frequency.Weekly,
             repeat = 3
         ))
@@ -221,7 +196,7 @@ class DecorationsTest {
 
     @Test
     fun transactionStartingAfterDateRange() {
-        val credit = Transaction.Credit(sampleData(
+        val credit = Transaction.Credit(sampleTransactionData(
             startDate = date(20, 1, 2020),
             frequency = Transaction.Frequency.Daily,
             repeat = 3
