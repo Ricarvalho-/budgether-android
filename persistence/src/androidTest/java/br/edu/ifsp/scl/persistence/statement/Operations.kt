@@ -9,8 +9,10 @@ fun DatabaseTest.credit(amount: Double = defaultValue,
                         at: Date = defaultDate,
                         into: Account = insertAccount(),
                         repeating: Frequency = Frequency.Single,
-                        during: Int = 0) =
+                        during: Int = 0,
+                        about: String = defaultTitle) =
     insert(Credit(sampleTransactionData(
+        category = about,
         value = amount,
         startDate = at,
         frequency = repeating,
@@ -22,8 +24,10 @@ fun DatabaseTest.debit(amount: Double = defaultValue,
                        at: Date = defaultDate,
                        from: Account = insertAccount(),
                        repeating: Frequency = Frequency.Single,
-                       during: Int = 0) =
+                       during: Int = 0,
+                       about: String = defaultTitle) =
     insert(Debit(sampleTransactionData(
+        category = about,
         value = amount,
         startDate = at,
         frequency = repeating,
@@ -36,9 +40,11 @@ fun DatabaseTest.transfer(amount: Double = defaultValue,
                           from: Account = insertAccount(),
                           to: Account = insertAccount(),
                           repeating: Frequency = Frequency.Single,
-                          during: Int = 0) =
+                          during: Int = 0,
+                          about: String = defaultTitle) =
     insert(Transference(
         sampleTransactionData(
+            category = about,
             value = amount,
             startDate = at,
             frequency = repeating,

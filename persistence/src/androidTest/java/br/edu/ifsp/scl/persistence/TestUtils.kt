@@ -1,5 +1,6 @@
 package br.edu.ifsp.scl.persistence
 
+import androidx.core.util.rangeTo
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.test.espresso.matcher.ViewMatchers.assertThat
@@ -37,6 +38,10 @@ fun <T> liveDataListWith(vararg values: T) =
 const val defaultTitle = "Sample"
 const val defaultValue = 10.0
 val defaultDate = date(1, 1, 2020)
+
+val defaultRange = defaultDate rangeTo date(31, 1, 2020)
+val dateBeforeRange = date(1, 12, 2019)
+val dateAfterRange = date(1, 2, 2020)
 
 fun sampleTransactionData(
     title: String = defaultTitle,
