@@ -84,7 +84,6 @@ fun TransactionDao.insert(transaction: Transaction) = when (transaction) {
     is Transference -> insert(transaction)
 }
 
-// Should not be used by app
 fun TransactionDao.allTransactions() = MediatorLiveData<List<Transaction>>().apply {
     var credits = listOf<Credit>()
     var debits = listOf<Debit>()

@@ -2,6 +2,7 @@ package br.edu.ifsp.scl.persistence.transaction
 
 import br.edu.ifsp.scl.persistence.*
 import br.edu.ifsp.scl.persistence.account.Account
+import br.edu.ifsp.scl.persistence.transaction.Transaction.*
 import br.edu.ifsp.scl.persistence.transaction.Transaction.Transference.RelativeKind.*
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -19,9 +20,9 @@ class TransactionCRUDTest : DatabaseTest() {
     fun insertedTransactionsShouldAppearInSelect() {
         val data = sampleTransactionData(insertAccount())
 
-        val credit = insert(Transaction.Credit(data))
-        val debit = insert(Transaction.Debit(data))
-        val transference = insert(Transaction.Transference(data, insertAccount().id))
+        val credit = insert(Credit(data))
+        val debit = insert(Debit(data))
+        val transference = insert(Transference(data, insertAccount().id))
 
         transactionDao.allTransactions().observedValue?.shouldContain(credit, debit, transference)
     }
@@ -32,9 +33,9 @@ class TransactionCRUDTest : DatabaseTest() {
         val secondAccount = insertAccount()
         val data = sampleTransactionData(account)
 
-        val credit = insert(Transaction.Credit(data))
-        val debit = insert(Transaction.Debit(data))
-        val transference = insert(Transaction.Transference(data, secondAccount.id))
+        val credit = insert(Credit(data))
+        val debit = insert(Debit(data))
+        val transference = insert(Transference(data, secondAccount.id))
 
         transactionDao.allTransactionsOf(account).observedValue?.shouldContain(credit, debit, transference)
         transactionDao.allTransactionsOf(secondAccount).observedValue?.shouldNotContain(credit, debit)
@@ -45,14 +46,14 @@ class TransactionCRUDTest : DatabaseTest() {
     fun insertedTransactionsShouldBeDifferent() {
         val data = sampleTransactionData(insertAccount())
 
-        insert(Transaction.Credit(data))
-        insert(Transaction.Credit(data))
+        insert(Credit(data))
+        insert(Credit(data))
 
-        insert(Transaction.Debit(data))
-        insert(Transaction.Debit(data))
+        insert(Debit(data))
+        insert(Debit(data))
 
-        insert(Transaction.Transference(data, insertAccount().id))
-        insert(Transaction.Transference(data, insertAccount().id))
+        insert(Transference(data, insertAccount().id))
+        insert(Transference(data, insertAccount().id))
 
         transactionDao.allCreditTransactions().observedValue?.let {
             it.first() shouldBeDifferentFrom it.last()
@@ -69,7 +70,7 @@ class TransactionCRUDTest : DatabaseTest() {
 
     @Test
     fun updatedTransactionsShouldBeUpdatedInSelect() {
-        val originalTransaction = insert(Transaction.Credit(
+        val originalTransaction = insert(Credit(
             sampleTransactionData(insertAccount(), "Original")
         ))
 
@@ -91,7 +92,7 @@ class TransactionCRUDTest : DatabaseTest() {
         val destinationAccount = insertAccount()
         val unrelatedAccount = insertAccount()
 
-        val transference = insert(Transaction.Transference(sampleTransactionData(account), destinationAccount.id))
+        val transference = insert(Transference(sampleTransactionData(account), destinationAccount.id))
 
         transference kindRelativeTo account shouldBeEqualTo Sent
         transference kindRelativeTo destinationAccount shouldBeEqualTo Received
@@ -101,7 +102,7 @@ class TransactionCRUDTest : DatabaseTest() {
     @Test
     fun insertedTransactionsShouldDisappearAfterDeletion() {
         val data = sampleTransactionData(insertAccount())
-        val transaction = insert(Transaction.Credit(data))
+        val transaction = insert(Credit(data))
         transactionDao.delete(transaction)
         assertTrue(transactionDao.allTransactions().observedValue?.isEmpty() ?: false)
     }
@@ -109,11 +110,11 @@ class TransactionCRUDTest : DatabaseTest() {
     @Test
     fun deletingAccountShouldDeleteAssociatedTransactions() {
         val data = sampleTransactionData(insertAccount())
-        val credit = insert(Transaction.Credit(data))
-        val debit = insert(Transaction.Debit(data))
+        val credit = insert(Credit(data))
+        val debit = insert(Debit(data))
 
         val destinationAccount = insertAccount()
-        val transference = insert(Transaction.Transference(data, destinationAccount.id))
+        val transference = insert(Transference(data, destinationAccount.id))
 
         accountDao.delete(destinationAccount)
 
@@ -125,8 +126,8 @@ class TransactionCRUDTest : DatabaseTest() {
     fun insertedTitlesShouldAppearInSelect() {
         val account = insertAccount()
 
-        insert(Transaction.Credit(sampleTransactionData(account, "a")))
-        insert(Transaction.Credit(sampleTransactionData(account, "b")))
+        insert(Credit(sampleTransactionData(account, "a")))
+        insert(Credit(sampleTransactionData(account, "b")))
 
         transactionDao.allCreditTitles().observedValue?.shouldBeEqualTo(listOf("a", "b"))
         transactionDao.allCreditTitles("a").observedValue?.shouldBeEqualTo(listOf("a"))
@@ -136,8 +137,8 @@ class TransactionCRUDTest : DatabaseTest() {
     fun insertedTitlesShouldAppearSortedInSelect() {
         val account = insertAccount()
 
-        insert(Transaction.Credit(sampleTransactionData(account, "b")))
-        insert(Transaction.Credit(sampleTransactionData(account, "a")))
+        insert(Credit(sampleTransactionData(account, "b")))
+        insert(Credit(sampleTransactionData(account, "a")))
 
         transactionDao.allCreditTitles().observedValue?.shouldBeEqualTo(listOf("a", "b"))
         transactionDao.allCreditTitles("a").observedValue?.shouldBeEqualTo(listOf("a"))
@@ -147,9 +148,9 @@ class TransactionCRUDTest : DatabaseTest() {
     fun insertedTitlesShouldNotAppearDuplicatedInSelect() {
         val account = insertAccount()
 
-        insert(Transaction.Credit(sampleTransactionData(account, "a")))
-        insert(Transaction.Credit(sampleTransactionData(account, "a")))
-        insert(Transaction.Credit(sampleTransactionData(account, "b")))
+        insert(Credit(sampleTransactionData(account, "a")))
+        insert(Credit(sampleTransactionData(account, "a")))
+        insert(Credit(sampleTransactionData(account, "b")))
 
         transactionDao.allCreditTitles().observedValue?.shouldBeEqualTo(listOf("a", "b"))
         transactionDao.allCreditTitles("a").observedValue?.shouldBeEqualTo(listOf("a"))
@@ -159,8 +160,8 @@ class TransactionCRUDTest : DatabaseTest() {
     fun insertedCategoriesShouldAppearInSelect() {
         val account = insertAccount()
 
-        insert(Transaction.Credit(sampleTransactionData(account, category = "a")))
-        insert(Transaction.Credit(sampleTransactionData(account, category = "b")))
+        insert(Credit(sampleTransactionData(account, category = "a")))
+        insert(Credit(sampleTransactionData(account, category = "b")))
 
         transactionDao.allCreditCategories().observedValue?.shouldBeEqualTo(listOf("a", "b"))
         transactionDao.allCreditCategories("a").observedValue?.shouldBeEqualTo(listOf("a"))
@@ -170,8 +171,8 @@ class TransactionCRUDTest : DatabaseTest() {
     fun insertedCategoriesShouldAppearSortedInSelect() {
         val account = insertAccount()
 
-        insert(Transaction.Credit(sampleTransactionData(account, category = "b")))
-        insert(Transaction.Credit(sampleTransactionData(account, category = "a")))
+        insert(Credit(sampleTransactionData(account, category = "b")))
+        insert(Credit(sampleTransactionData(account, category = "a")))
 
         transactionDao.allCreditCategories().observedValue?.shouldBeEqualTo(listOf("a", "b"))
         transactionDao.allCreditCategories("a").observedValue?.shouldBeEqualTo(listOf("a"))
@@ -181,9 +182,9 @@ class TransactionCRUDTest : DatabaseTest() {
     fun insertedCategoriesShouldNotAppearDuplicatedInSelect() {
         val account = insertAccount()
 
-        insert(Transaction.Credit(sampleTransactionData(account, category = "a")))
-        insert(Transaction.Credit(sampleTransactionData(account, category = "a")))
-        insert(Transaction.Credit(sampleTransactionData(account, category = "b")))
+        insert(Credit(sampleTransactionData(account, category = "a")))
+        insert(Credit(sampleTransactionData(account, category = "a")))
+        insert(Credit(sampleTransactionData(account, category = "b")))
 
         transactionDao.allCreditCategories().observedValue?.shouldBeEqualTo(listOf("a", "b"))
         transactionDao.allCreditCategories("a").observedValue?.shouldBeEqualTo(listOf("a"))
@@ -193,8 +194,8 @@ class TransactionCRUDTest : DatabaseTest() {
     fun insertedCategoriesShouldAppearInSelectOfAssociatedAccounts() {
         val account = insertAccount()
 
-        insert(Transaction.Credit(sampleTransactionData(account, category = "a")))
-        insert(Transaction.Credit(sampleTransactionData(insertAccount(), category = "b")))
+        insert(Credit(sampleTransactionData(account, category = "a")))
+        insert(Credit(sampleTransactionData(insertAccount(), category = "b")))
 
         transactionDao.allTransactionCategoriesOfAccount(account.id)
             .observedValue?.shouldBeEqualTo(listOf("a"))

@@ -6,14 +6,14 @@ import androidx.room.TypeConverters
 import br.edu.ifsp.scl.persistence.account.Account
 import br.edu.ifsp.scl.persistence.account.AccountDao
 import br.edu.ifsp.scl.persistence.statement.StatementDao
-import br.edu.ifsp.scl.persistence.transaction.Transaction
+import br.edu.ifsp.scl.persistence.transaction.Transaction.*
 import br.edu.ifsp.scl.persistence.transaction.TransactionDao
 
 @Database(version = 1, entities = [
     Account::class,
-    Transaction.Credit::class,
-    Transaction.Debit::class,
-    Transaction.Transference::class
+    Credit::class,
+    Debit::class,
+    Transference::class
 ])
 @TypeConverters(Converters::class)
 abstract class Database : RoomDatabase() {

@@ -4,6 +4,7 @@ import android.util.Range
 import androidx.core.util.rangeTo
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Transformations
+import br.edu.ifsp.scl.persistence.transaction.Repeatability.Many.Times.*
 import br.edu.ifsp.scl.persistence.transaction.Transaction.Frequency.*
 import java.util.*
 
@@ -69,8 +70,8 @@ data class RepeatingTransaction(val transaction: Transaction, val atDate: Date, 
     }
 
     private val times get() =
-        if (transaction.isIndeterminate) Repeatability.Many.Times.Indeterminate
-        else Repeatability.Many.Times.Determinate(
+        if (transaction.isIndeterminate) Indeterminate
+        else Determinate(
             transaction.repeat
         )
 }
