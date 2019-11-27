@@ -8,12 +8,12 @@ import br.edu.ifsp.scl.persistence.transaction.Repeatability.Many.Times.*
 import br.edu.ifsp.scl.persistence.transaction.Transaction.Frequency.*
 import java.util.*
 
-infix fun <T : Transaction> LiveData<out List<T>>.before(date: Date) = Transformations.map(this) { items ->
+infix fun <T : Transaction> LiveData<out List<T>>.repeatingBefore(date: Date) = Transformations.map(this) { items ->
     items.flatMap { it.repeatWhileAffecting(it.startDate.coerceAtMost(date) rangeTo date) }
         .sortedBy { it.atDate }
 } as LiveData<List<RepeatingTransaction>>
 
-infix fun <T : Transaction> LiveData<out List<T>>.affecting(dateRange: Range<Date>) = Transformations.map(this) { items ->
+infix fun <T : Transaction> LiveData<out List<T>>.repeatingWhenAffect(dateRange: Range<Date>) = Transformations.map(this) { items ->
     items.flatMap { it.repeatWhileAffecting(dateRange) }
         .sortedBy { it.atDate }
 } as LiveData<List<RepeatingTransaction>>

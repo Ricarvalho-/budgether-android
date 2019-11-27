@@ -20,7 +20,7 @@ class DecorationsTest {
         ))
 
         val transactions = liveDataListWith(credit)
-        transactions.before(
+        transactions.repeatingBefore(
             date(14, 1, 2020)
         ).observedValue?.shouldBeEqualTo(listOf(
             RepeatingTransaction(credit, date(1, 1, 2020), 1),
@@ -36,7 +36,7 @@ class DecorationsTest {
         ))
 
         val transactions = liveDataListWith(credit)
-        transactions.before(
+        transactions.repeatingBefore(
             date(15, 1, 2020)
         ).observedValue?.shouldBeEqualTo(listOf(
             RepeatingTransaction(credit, date(1, 1, 2020), 1),
@@ -53,7 +53,7 @@ class DecorationsTest {
         ))
 
         val transactions = liveDataListWith(credit)
-        transactions.before(
+        transactions.repeatingBefore(
             date(1, 1, 2021)
         ).observedValue?.size?.shouldBeEqualTo(3)
     }
@@ -66,7 +66,7 @@ class DecorationsTest {
         ))
 
         val transactions = liveDataListWith(credit)
-        transactions.before(
+        transactions.repeatingBefore(
             date(1, 1, 2023)
         ).observedValue?.shouldBeEqualTo(listOf(
             RepeatingTransaction(credit, date(1, 1, 2020), 1),
@@ -81,7 +81,7 @@ class DecorationsTest {
         val sampleDate = sampleTransactionData().startDate
 
         val transactions = liveDataListWith(credit, debit)
-        transactions.before(
+        transactions.repeatingBefore(
             sampleDate
         ).observedValue?.shouldBeEqualTo(listOf(
             RepeatingTransaction(credit, sampleDate, 1),
@@ -103,7 +103,7 @@ class DecorationsTest {
         ))
 
         val transactions = liveDataListWith(credit, debit)
-        transactions.before(
+        transactions.repeatingBefore(
             date(1, 1, 2021)
         ).observedValue?.shouldBeEqualTo(listOf(
             RepeatingTransaction(debit, date(1, 1, 2020), 1),
@@ -123,7 +123,7 @@ class DecorationsTest {
         ))
 
         val transactions = liveDataListWith(credit)
-        transactions.before(
+        transactions.repeatingBefore(
             date(1, 1, 2021)
         ).observedValue?.shouldBeEqualTo(listOf(
             RepeatingTransaction(credit, date(30, 11, 2019), 1),
@@ -142,7 +142,7 @@ class DecorationsTest {
         ))
 
         val transactions = liveDataListWith(credit)
-        transactions.affecting(
+        transactions.repeatingWhenAffect(
             date(5, 1, 2020) rangeTo date(10, 1, 2020)
         ).observedValue?.let { assertTrue(it.isEmpty()) }
     }
@@ -155,7 +155,7 @@ class DecorationsTest {
         ))
 
         val transactions = liveDataListWith(credit)
-        transactions.affecting(
+        transactions.repeatingWhenAffect(
             date(5, 1, 2020) rangeTo date(15, 1, 2020)
         ).observedValue?.shouldBeEqualTo(listOf(
             RepeatingTransaction(credit, date(8, 1, 2020), 2),
@@ -171,7 +171,7 @@ class DecorationsTest {
         ))
 
         val transactions = liveDataListWith(credit)
-        transactions.affecting(
+        transactions.repeatingWhenAffect(
             date(1, 1, 2020) rangeTo date(10, 1, 2020)
         ).observedValue?.shouldBeEqualTo(listOf(
             RepeatingTransaction(credit, date(1, 1, 2020), 1),
@@ -188,7 +188,7 @@ class DecorationsTest {
         ))
 
         val transactions = liveDataListWith(credit)
-        transactions.affecting(
+        transactions.repeatingWhenAffect(
             date(1, 1, 2020) rangeTo date(10, 1, 2020)
         ).observedValue?.shouldBeEqualTo(listOf(
             RepeatingTransaction(credit, date(1, 1, 2020), 1),
@@ -205,7 +205,7 @@ class DecorationsTest {
         ))
 
         val transactions = liveDataListWith(credit)
-        transactions.affecting(
+        transactions.repeatingWhenAffect(
             date(1, 1, 2020) rangeTo date(10, 1, 2020)
         ).observedValue?.let { assertTrue(it.isEmpty()) }
     }

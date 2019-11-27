@@ -11,7 +11,7 @@ import java.util.*
 class AccountBalanceTest : DatabaseTest() {
     private lateinit var account: Account
     private val Account.currentTotalBalance get() = totalBalanceAt(defaultDate)
-    private infix fun Account.totalBalanceAt(date: Date) = statementDao.balanceOf(this, date) getting { observedValue!! }
+    private infix fun Account.totalBalanceAt(date: Date) = statementDao.balanceAt(this, date) getting { observedValue!! }
 
     @Before
     fun createAccount() {

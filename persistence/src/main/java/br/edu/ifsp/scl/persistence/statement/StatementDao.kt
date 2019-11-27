@@ -11,8 +11,8 @@ import br.edu.ifsp.scl.persistence.transaction.RepeatingTransaction
 import br.edu.ifsp.scl.persistence.transaction.Transaction
 import br.edu.ifsp.scl.persistence.transaction.Transaction.*
 import br.edu.ifsp.scl.persistence.transaction.Transaction.Transference.RelativeKind.*
-import br.edu.ifsp.scl.persistence.transaction.affecting
-import br.edu.ifsp.scl.persistence.transaction.before
+import br.edu.ifsp.scl.persistence.transaction.repeatingWhenAffect
+import br.edu.ifsp.scl.persistence.transaction.repeatingBefore
 import java.util.*
 
 @Dao
@@ -55,14 +55,14 @@ abstract class StatementDao {
 
     infix fun totalBalanceAt(date: Date) =
         Transformations.map(
-            allTransactionsBefore(date).before(date)
+            allTransactionsBefore(date) repeatingBefore date
         ) { repeatingTransactions ->
             repeatingTransactions.sumByDouble { it.transaction.relativeValue }
         } as LiveData<Double>
 
-    fun balanceOf(account: Account, atDate: Date): LiveData<Double> =
+    fun balanceAt(account: Account, date: Date): LiveData<Double> =
         Transformations.map(
-            allTransactionsOfAccountBefore(account, atDate).before(atDate)
+            account allTransactionsBefore date repeatingBefore date
         ) { repeatingTransactions ->
             repeatingTransactions.sumByDouble { it.transaction relativeValueTo account }
         } as LiveData<Double>
@@ -86,7 +86,7 @@ abstract class StatementDao {
         kind == null -> allTransactionsBefore(range.upper)
         categories == null || categories.isEmpty() -> transactionsOfKindBefore(kind, range.upper)
         else -> transactionsOfKindWithCategoriesBefore(kind, categories, range.upper)
-    } affecting range
+    } repeatingWhenAffect range
 
     private fun transactionsOfKindBefore(kind: TransactionKind, date: Date) = when (kind) {
         TransactionKind.Credit -> allCreditTransactionsBefore(date)
@@ -103,9 +103,9 @@ abstract class StatementDao {
     private infix fun allTransactionsBefore(date: Date) = MediatorLiveData<List<Transaction>>().apply {
         var credits = listOf<Credit>()
         var debits = listOf<Debit>()
-        var transferences = listOf<Transference>()
+        var transfers = listOf<Transference>()
 
-        fun union() = (credits + debits + transferences)
+        fun union() = (credits + debits + transfers)
 
         addSource(allCreditTransactionsBefore(date)) {
             credits = it
@@ -116,28 +116,28 @@ abstract class StatementDao {
             value = union()
         }
         addSource(allTransferenceTransactionsBefore(date)) {
-            transferences = it
+            transfers = it
             value = union()
         }
     } as LiveData<List<Transaction>>
 
-    private fun allTransactionsOfAccountBefore(account: Account, date: Date) = MediatorLiveData<List<Transaction>>().apply {
+    private infix fun Account.allTransactionsBefore(date: Date) = MediatorLiveData<List<Transaction>>().apply {
         var credits = listOf<Credit>()
         var debits = listOf<Debit>()
-        var transferences = listOf<Transference>()
+        var transfers = listOf<Transference>()
 
-        fun union() = (credits + debits + transferences)
+        fun union() = (credits + debits + transfers)
 
-        addSource(allCreditTransactionsOfAccountBefore(account.id, date)) {
+        addSource(allCreditTransactionsOfAccountBefore(id, date)) {
             credits = it
             value = union()
         }
-        addSource(allDebitTransactionsOfAccountBefore(account.id, date)) {
+        addSource(allDebitTransactionsOfAccountBefore(id, date)) {
             debits = it
             value = union()
         }
-        addSource(allTransferenceTransactionsOfAccountBefore(account.id, date)) {
-            transferences = it
+        addSource(allTransferenceTransactionsOfAccountBefore(id, date)) {
+            transfers = it
             value = union()
         }
     } as LiveData<List<Transaction>>
