@@ -2,6 +2,7 @@ package br.edu.ifsp.scl.persistence.account
 
 import br.edu.ifsp.scl.persistence.*
 import junit.framework.AssertionFailedError
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class AccountCRUDTest : DatabaseTest() {
@@ -55,6 +56,6 @@ class AccountCRUDTest : DatabaseTest() {
     fun insertedAccountsShouldDisappearAfterDeletion() {
         val account = insertAccount()
         accountDao.delete(account)
-        assert(accountDao.allAccounts().observedValue?.isEmpty() ?: false)
+        assertTrue(accountDao.allAccounts().observedValue?.isEmpty() ?: false)
     }
 }

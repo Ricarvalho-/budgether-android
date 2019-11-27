@@ -3,6 +3,7 @@ package br.edu.ifsp.scl.persistence.transaction
 import br.edu.ifsp.scl.persistence.*
 import br.edu.ifsp.scl.persistence.account.Account
 import br.edu.ifsp.scl.persistence.transaction.Transaction.Transference.RelativeKind.*
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.util.*
 
@@ -102,7 +103,7 @@ class TransactionCRUDTest : DatabaseTest() {
         val data = sampleTransactionData(insertAccount())
         val transaction = insert(Transaction.Credit(data))
         transactionDao.delete(transaction)
-        assert(transactionDao.allTransactions().observedValue?.isEmpty() ?: false)
+        assertTrue(transactionDao.allTransactions().observedValue?.isEmpty() ?: false)
     }
 
     @Test

@@ -3,6 +3,7 @@ package br.edu.ifsp.scl.persistence.transaction
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.core.util.rangeTo
 import br.edu.ifsp.scl.persistence.*
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 
@@ -142,7 +143,7 @@ class DecorationsTest {
         val transactions = liveDataListWith(credit)
         transactions.affecting(
             date(5, 1, 2020) rangeTo date(10, 1, 2020)
-        ).observedValue?.let { assert(it.isEmpty()) }
+        ).observedValue?.let { assertTrue(it.isEmpty()) }
     }
 
     @Test
@@ -205,6 +206,6 @@ class DecorationsTest {
         val transactions = liveDataListWith(credit)
         transactions.affecting(
             date(1, 1, 2020) rangeTo date(10, 1, 2020)
-        ).observedValue?.let { assert(it.isEmpty()) }
+        ).observedValue?.let { assertTrue(it.isEmpty()) }
     }
 }
