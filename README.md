@@ -1,5 +1,11 @@
 # Budgether
 
+[![Actions Status](https://github.com/Ricarvalho-/budgether-android/workflows/Build/badge.svg)](https://github.com/Ricarvalho-/budgether-android/actions)
+
+[![Actions Status](https://github.com/Ricarvalho-/budgether-android/workflows/Unit%20Tests/badge.svg)](https://github.com/Ricarvalho-/budgether-android/actions)
+
+[![Actions Status](https://github.com/Ricarvalho-/budgether-android/workflows/Integration%20Tests/badge.svg)](https://github.com/Ricarvalho-/budgether-android/actions)
+
 Aplicativo de gerenciamento financeiro desenvolvido para a disciplina "Programação de Dispositivos Android 1" do curso "Especialização em Desenvolvimento de Sistemas para Dispositivos Móveis" do IFSP campus São Carlos.
 
 [Protótipo navegável](https://www.figma.com/proto/GmJHHJ6vECRGKV80wFg7VV/Budgether-Material-Dark-Theme)
