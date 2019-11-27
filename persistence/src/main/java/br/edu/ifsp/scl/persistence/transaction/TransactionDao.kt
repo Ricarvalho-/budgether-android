@@ -4,35 +4,36 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.room.*
 import br.edu.ifsp.scl.persistence.account.Account
+import br.edu.ifsp.scl.persistence.transaction.Transaction.*
 
 @Dao
 interface TransactionDao {
     @Insert
-    fun insert(credit: Transaction.Credit): Long
+    fun insert(credit: Credit): Long
 
     @Insert
-    fun insert(debit: Transaction.Debit): Long
+    fun insert(debit: Debit): Long
 
     @Insert
-    fun insert(transference: Transaction.Transference): Long
+    fun insert(transference: Transference): Long
 
     @Query("select * from Credit")
-    fun allCreditTransactions(): LiveData<List<Transaction.Credit>>
+    fun allCreditTransactions(): LiveData<List<Credit>>
 
     @Query("select * from Debit")
-    fun allDebitTransactions(): LiveData<List<Transaction.Debit>>
+    fun allDebitTransactions(): LiveData<List<Debit>>
 
     @Query("select * from Transference")
-    fun allTransferenceTransactions(): LiveData<List<Transaction.Transference>>
+    fun allTransferenceTransactions(): LiveData<List<Transference>>
 
     @Query("select * from Credit where accountId = :accountId")
-    fun allCreditTransactionsOfAccount(accountId: Long): LiveData<List<Transaction.Credit>>
+    fun allCreditTransactionsOfAccount(accountId: Long): LiveData<List<Credit>>
 
     @Query("select * from Debit where accountId = :accountId")
-    fun allDebitTransactionsOfAccount(accountId: Long): LiveData<List<Transaction.Debit>>
+    fun allDebitTransactionsOfAccount(accountId: Long): LiveData<List<Debit>>
 
     @Query("select * from Transference where accountId = :accountId or destinationAccountId = :accountId")
-    fun allTransferenceTransactionsOfAccount(accountId: Long): LiveData<List<Transaction.Transference>>
+    fun allTransferenceTransactionsOfAccount(accountId: Long): LiveData<List<Transference>>
 
     @Query("select distinct title from Credit where title like '%'||:like||'%' order by title")
     fun allCreditTitles(like: String = ""): LiveData<List<String>>
@@ -59,34 +60,35 @@ interface TransactionDao {
     fun allTransactionCategoriesOfAccount(accountId: Long): LiveData<List<String>>
 
     @Update
-    fun update(credit: Transaction.Credit)
+    fun update(credit: Credit)
 
     @Update
-    fun update(debit: Transaction.Debit)
+    fun update(debit: Debit)
 
     @Update
-    fun update(transference: Transaction.Transference)
+    fun update(transference: Transference)
 
     @Delete
-    fun delete(credit: Transaction.Credit)
+    fun delete(credit: Credit)
 
     @Delete
-    fun delete(debit: Transaction.Debit)
+    fun delete(debit: Debit)
 
     @Delete
-    fun delete(transference: Transaction.Transference)
+    fun delete(transference: Transference)
 }
 
-fun TransactionDao.insert(transaction: Transaction) = when(transaction) {
-    is Transaction.Credit -> insert(transaction)
-    is Transaction.Debit -> insert(transaction)
-    is Transaction.Transference -> insert(transaction)
+fun TransactionDao.insert(transaction: Transaction) = when (transaction) {
+    is Credit -> insert(transaction)
+    is Debit -> insert(transaction)
+    is Transference -> insert(transaction)
 }
 
+// Should not be used by app
 fun TransactionDao.allTransactions() = MediatorLiveData<List<Transaction>>().apply {
-    var credits = listOf<Transaction.Credit>()
-    var debits = listOf<Transaction.Debit>()
-    var transferences = listOf<Transaction.Transference>()
+    var credits = listOf<Credit>()
+    var debits = listOf<Debit>()
+    var transferences = listOf<Transference>()
 
     fun sortedUnion() = (credits + debits + transferences).sortedBy { it.startDate }
 
@@ -105,9 +107,9 @@ fun TransactionDao.allTransactions() = MediatorLiveData<List<Transaction>>().app
 } as LiveData<List<Transaction>>
 
 fun TransactionDao.allTransactionsOf(account: Account) = MediatorLiveData<List<Transaction>>().apply {
-    var credits = listOf<Transaction.Credit>()
-    var debits = listOf<Transaction.Debit>()
-    var transferences = listOf<Transaction.Transference>()
+    var credits = listOf<Credit>()
+    var debits = listOf<Debit>()
+    var transferences = listOf<Transference>()
 
     fun sortedUnion() = (credits + debits + transferences).sortedBy { it.startDate }
 
@@ -125,14 +127,14 @@ fun TransactionDao.allTransactionsOf(account: Account) = MediatorLiveData<List<T
     }
 } as LiveData<List<Transaction>>
 
-fun TransactionDao.update(transaction: Transaction) = when(transaction) {
-    is Transaction.Credit -> update(transaction)
-    is Transaction.Debit -> update(transaction)
-    is Transaction.Transference -> update(transaction)
+fun TransactionDao.update(transaction: Transaction) = when (transaction) {
+    is Credit -> update(transaction)
+    is Debit -> update(transaction)
+    is Transference -> update(transaction)
 }
 
-fun TransactionDao.delete(transaction: Transaction) = when(transaction) {
-    is Transaction.Credit -> delete(transaction)
-    is Transaction.Debit -> delete(transaction)
-    is Transaction.Transference -> delete(transaction)
+fun TransactionDao.delete(transaction: Transaction) = when (transaction) {
+    is Credit -> delete(transaction)
+    is Debit -> delete(transaction)
+    is Transference -> delete(transaction)
 }

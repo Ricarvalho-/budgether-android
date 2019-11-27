@@ -3,6 +3,7 @@ package br.edu.ifsp.scl.persistence.transaction
 import androidx.room.*
 import androidx.room.ForeignKey.CASCADE
 import br.edu.ifsp.scl.persistence.account.Account
+import br.edu.ifsp.scl.persistence.transaction.Transaction.Transference.RelativeKind.*
 import java.util.*
 
 @Entity(indices = [Index("title"), Index("category"), Index("startDate"), Index("accountId")])
@@ -54,10 +55,10 @@ sealed class Transaction : TransactionData {
         @PrimaryKey(autoGenerate = true) val id: Long = 0
     ) : Transaction(), TransactionData by data {
 
-        infix fun kindRelativeTo(account: Account) = when(account.id) {
-            accountId -> RelativeKind.Sent
-            destinationAccountId -> RelativeKind.Received
-            else -> RelativeKind.Unrelated
+        infix fun kindRelativeTo(account: Account) = when (account.id) {
+            accountId -> Sent
+            destinationAccountId -> Received
+            else -> Unrelated
         }
 
         enum class RelativeKind { Sent, Received, Unrelated }
