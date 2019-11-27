@@ -5,6 +5,7 @@ import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.Transformations
 import androidx.room.Dao
 import androidx.room.Query
+import br.edu.ifsp.scl.persistence.account.Account
 import br.edu.ifsp.scl.persistence.transaction.Transaction
 import br.edu.ifsp.scl.persistence.transaction.Transaction.*
 import br.edu.ifsp.scl.persistence.transaction.Transaction.Transference.RelativeKind.*
@@ -47,6 +48,28 @@ abstract class StatementDao {
             repeatingTransactions.sumByDouble { it.transaction.relativeValue }
         } as LiveData<Double>
 
+    fun balanceOf(account: Account, atDate: Date): LiveData<Double> =
+        Transformations.map(
+            allTransactionsOfAccountBefore(account, atDate).before(atDate)
+        ) { repeatingTransactions ->
+            repeatingTransactions.sumByDouble { it.transaction relativeValueTo account }
+        } as LiveData<Double>
+
+    private infix fun Transaction.relativeValueTo(account: Account) =
+        if (this is Transference)
+            when (this kindRelativeTo account) {
+                Sent -> -value
+                Received -> value
+                Unrelated -> 0.0
+            }
+        else relativeValue
+
+    private val Transaction.relativeValue get() = when (this) {
+        is Credit -> value
+        is Debit -> -value
+        is Transference -> 0.0
+    }
+
     private infix fun allTransactionsBefore(date: Date) = MediatorLiveData<List<Transaction>>().apply {
         var credits = listOf<Credit>()
         var debits = listOf<Debit>()
@@ -68,9 +91,24 @@ abstract class StatementDao {
         }
     } as LiveData<List<Transaction>>
 
-    private val Transaction.relativeValue get() = when(this) {
-        is Transaction.Credit -> value
-        is Transaction.Debit -> -value
-        is Transaction.Transference -> 0.0
-    }
+    private fun allTransactionsOfAccountBefore(account: Account, date: Date) = MediatorLiveData<List<Transaction>>().apply {
+        var credits = listOf<Credit>()
+        var debits = listOf<Debit>()
+        var transferences = listOf<Transference>()
+
+        fun union() = (credits + debits + transferences)
+
+        addSource(allCreditTransactionsOfAccountBefore(account.id, date)) {
+            credits = it
+            value = union()
+        }
+        addSource(allDebitTransactionsOfAccountBefore(account.id, date)) {
+            debits = it
+            value = union()
+        }
+        addSource(allTransferenceTransactionsOfAccountBefore(account.id, date)) {
+            transferences = it
+            value = union()
+        }
+    } as LiveData<List<Transaction>>
 }
