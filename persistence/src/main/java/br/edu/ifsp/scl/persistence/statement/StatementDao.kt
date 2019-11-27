@@ -17,6 +17,7 @@ import java.util.*
 
 @Dao
 abstract class StatementDao {
+    //region All accounts selects
     @Query("select * from Credit where startDate <= :startDate")
     internal abstract fun allCreditTransactionsBefore(startDate: Date): LiveData<List<Credit>>
 
@@ -26,6 +27,7 @@ abstract class StatementDao {
     @Query("select * from Transference where startDate <= :startDate")
     internal abstract fun allTransferenceTransactionsBefore(startDate: Date): LiveData<List<Transference>>
 
+    //region With category
     @Query("select * from Credit where category in (:categories) and startDate <= :startDate")
     internal abstract fun allCreditTransactionsWithCategoriesBefore(categories: List<String>, startDate: Date): LiveData<List<Credit>>
 
@@ -34,7 +36,10 @@ abstract class StatementDao {
 
     @Query("select * from Transference where category in (:categories) and startDate <= :startDate")
     internal abstract fun allTransferenceTransactionsWithCategoriesBefore(categories: List<String>, startDate: Date): LiveData<List<Transference>>
+    //endregion
+    //endregion
 
+    //region Specific account selects
     @Query("select * from Credit where accountId = :accountId and startDate <= :startDate")
     internal abstract fun allCreditTransactionsOfAccountBefore(accountId: Long, startDate: Date): LiveData<List<Credit>>
 
@@ -44,15 +49,28 @@ abstract class StatementDao {
     @Query("select * from Transference where (accountId = :accountId or destinationAccountId = :accountId) and startDate <= :startDate")
     internal abstract fun allTransferenceTransactionsOfAccountBefore(accountId: Long, startDate: Date): LiveData<List<Transference>>
 
+    @Query("select * from Transference where accountId = :accountId and startDate <= :startDate")
+    internal abstract fun allSentTransferenceTransactionsOfAccountBefore(accountId: Long, startDate: Date): LiveData<List<Transference>>
+
+    @Query("select * from Transference where destinationAccountId = :accountId and startDate <= :startDate")
+    internal abstract fun allReceivedTransferenceTransactionsOfAccountBefore(accountId: Long, startDate: Date): LiveData<List<Transference>>
+
+    //region With category
     @Query("select * from Credit where accountId = :accountId and category in (:categories) and startDate <= :startDate")
     internal abstract fun allCreditTransactionsOfAccountWithCategoriesBefore(accountId: Long, categories: List<String>, startDate: Date): LiveData<List<Credit>>
 
     @Query("select * from Debit where accountId = :accountId and category in (:categories) and startDate <= :startDate")
     internal abstract fun allDebitTransactionsOfAccountWithCategoriesBefore(accountId: Long, categories: List<String>, startDate: Date): LiveData<List<Debit>>
 
-    @Query("select * from Transference where (accountId = :accountId or destinationAccountId = :accountId) and category in (:categories) and startDate <= :startDate")
-    internal abstract fun allTransferenceTransactionsOfAccountWithCategoriesBefore(accountId: Long, categories: List<String>, startDate: Date): LiveData<List<Transference>>
+    @Query("select * from Transference where accountId = :accountId and category in (:categories) and startDate <= :startDate")
+    internal abstract fun allSentTransferenceTransactionsOfAccountWithCategoriesBefore(accountId: Long, categories: List<String>, startDate: Date): LiveData<List<Transference>>
 
+    @Query("select * from Transference where destinationAccountId = :accountId and category in (:categories) and startDate <= :startDate")
+    internal abstract fun allReceivedTransferenceTransactionsOfAccountWithCategoriesBefore(accountId: Long, categories: List<String>, startDate: Date): LiveData<List<Transference>>
+    //endregion
+    //endregion
+
+    //region Balance at date
     infix fun totalBalanceAt(date: Date) =
         Transformations.map(
             allTransactionsBefore(date) repeatingBefore date
@@ -81,7 +99,9 @@ abstract class StatementDao {
         is Debit -> -value
         is Transference -> 0.0
     }
+    //endregion
 
+    //region Transactions in date range
     fun transactionsIn(range: Range<Date>, kind: TransactionKind? = null, categories: List<String>? = null) = when {
         kind == null -> allTransactionsBefore(range.upper)
         categories == null || categories.isEmpty() -> transactionsOfKindBefore(kind, range.upper)
@@ -100,6 +120,28 @@ abstract class StatementDao {
         TransactionKind.Transference -> allTransferenceTransactionsWithCategoriesBefore(categories, date)
     }
 
+    fun transactionsIn(account: Account, range: Range<Date>, kind: RelativeTransactionKind? = null, categories: List<String>? = null) = when {
+        kind == null -> account allTransactionsBefore range.upper
+        categories == null || categories.isEmpty() -> account.transactionsOfKindBefore(kind, range.upper)
+        else -> account.transactionsOfKindWithCategoriesBefore(kind, categories, range.upper)
+    } repeatingWhenAffect range
+
+    private fun Account.transactionsOfKindBefore(kind: RelativeTransactionKind, date: Date) = when (kind) {
+        RelativeTransactionKind.Credit -> allCreditTransactionsOfAccountBefore(id, date)
+        RelativeTransactionKind.Debit -> allDebitTransactionsOfAccountBefore(id, date)
+        RelativeTransactionKind.SentTransference -> allSentTransferenceTransactionsOfAccountBefore(id, date)
+        RelativeTransactionKind.ReceivedTransference -> allReceivedTransferenceTransactionsOfAccountBefore(id, date)
+    }
+
+    private fun Account.transactionsOfKindWithCategoriesBefore(kind: RelativeTransactionKind, categories: List<String>, date: Date) = when (kind) {
+        RelativeTransactionKind.Credit -> allCreditTransactionsOfAccountWithCategoriesBefore(id, categories, date)
+        RelativeTransactionKind.Debit -> allDebitTransactionsOfAccountWithCategoriesBefore(id, categories, date)
+        RelativeTransactionKind.SentTransference -> allSentTransferenceTransactionsOfAccountWithCategoriesBefore(id, categories, date)
+        RelativeTransactionKind.ReceivedTransference -> allReceivedTransferenceTransactionsOfAccountWithCategoriesBefore(id, categories, date)
+    }
+    //endregion
+
+    //region Common
     private infix fun allTransactionsBefore(date: Date) = MediatorLiveData<List<Transaction>>().apply {
         var credits = listOf<Credit>()
         var debits = listOf<Debit>()
@@ -143,4 +185,6 @@ abstract class StatementDao {
     } as LiveData<List<Transaction>>
 
     enum class TransactionKind { Credit, Debit, Transference }
+    enum class RelativeTransactionKind { Credit, Debit, SentTransference, ReceivedTransference }
+    //endregion
 }

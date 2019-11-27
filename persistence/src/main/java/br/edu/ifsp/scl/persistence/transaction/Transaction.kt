@@ -9,10 +9,10 @@ import java.util.*
 @Entity(indices = [Index("title"), Index("category"), Index("startDate"), Index("accountId")])
 sealed class Transaction : TransactionData {
     companion object {
-        private const val indeterminateRepeat = 1
+        private const val INDETERMINATE_REPEAT = 1
     }
 
-    val isIndeterminate get() = repeat == indeterminateRepeat
+    val isIndeterminate get() = repeat == INDETERMINATE_REPEAT
 
     data class Data(
         override val title: String,
