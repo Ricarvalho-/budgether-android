@@ -5,6 +5,7 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import br.edu.ifsp.scl.persistence.account.Account
 import br.edu.ifsp.scl.persistence.account.AccountDao
+import br.edu.ifsp.scl.persistence.statement.StatementDao
 import br.edu.ifsp.scl.persistence.transaction.Transaction
 import br.edu.ifsp.scl.persistence.transaction.TransactionDao
 
@@ -18,4 +19,5 @@ import br.edu.ifsp.scl.persistence.transaction.TransactionDao
 abstract class Database : RoomDatabase() {
     abstract fun accountDao(): AccountDao
     abstract fun transactionDao(): TransactionDao
+    abstract fun statementDao(): StatementDao
 }

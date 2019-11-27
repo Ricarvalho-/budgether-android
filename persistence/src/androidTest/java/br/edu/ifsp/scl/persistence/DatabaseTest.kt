@@ -6,6 +6,7 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import br.edu.ifsp.scl.persistence.account.AccountDao
+import br.edu.ifsp.scl.persistence.statement.StatementDao
 import br.edu.ifsp.scl.persistence.transaction.TransactionDao
 import org.junit.After
 import org.junit.Before
@@ -20,6 +21,7 @@ abstract class DatabaseTest {
     private lateinit var db: Database
     internal lateinit var transactionDao: TransactionDao
     internal lateinit var accountDao: AccountDao
+    internal lateinit var statementDao: StatementDao
 
     @Before
     fun prepareDependencies() {
@@ -35,6 +37,7 @@ abstract class DatabaseTest {
     private fun createDaos() {
         transactionDao = db.transactionDao()
         accountDao = db.accountDao()
+        statementDao = db.statementDao()
     }
 
     @After
