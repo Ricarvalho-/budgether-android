@@ -1,37 +1,74 @@
 package br.edu.ifsp.scl.persistence.statement
 
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
+import androidx.lifecycle.Transformations
 import androidx.room.Dao
 import androidx.room.Query
 import br.edu.ifsp.scl.persistence.transaction.Transaction
+import br.edu.ifsp.scl.persistence.transaction.before
 import java.util.*
 
 @Dao
-interface StatementDao {
+abstract class StatementDao {
     @Query("select * from Credit where startDate <= :startDate")
-    fun allCreditTransactionsBefore(startDate: Date): LiveData<List<Transaction.Credit>>
+    internal abstract fun allCreditTransactionsBefore(startDate: Date): LiveData<List<Transaction.Credit>>
 
     @Query("select * from Debit where startDate <= :startDate")
-    fun allDebitTransactionsBefore(startDate: Date): LiveData<List<Transaction.Debit>>
+    internal abstract fun allDebitTransactionsBefore(startDate: Date): LiveData<List<Transaction.Debit>>
 
     @Query("select * from Transference where startDate <= :startDate")
-    fun allTransferenceTransactionsBefore(startDate: Date): LiveData<List<Transaction.Transference>>
+    internal abstract fun allTransferenceTransactionsBefore(startDate: Date): LiveData<List<Transaction.Transference>>
 
     @Query("select * from Credit where accountId = :accountId and startDate <= :startDate")
-    fun allCreditTransactionsOfAccountBefore(accountId: Long, startDate: Date): LiveData<List<Transaction.Credit>>
+    internal abstract fun allCreditTransactionsOfAccountBefore(accountId: Long, startDate: Date): LiveData<List<Transaction.Credit>>
 
     @Query("select * from Debit where accountId = :accountId and startDate <= :startDate")
-    fun allDebitTransactionsOfAccountBefore(accountId: Long, startDate: Date): LiveData<List<Transaction.Debit>>
+    internal abstract fun allDebitTransactionsOfAccountBefore(accountId: Long, startDate: Date): LiveData<List<Transaction.Debit>>
 
     @Query("select * from Transference where (accountId = :accountId or destinationAccountId = :accountId) and startDate <= :startDate")
-    fun allTransferenceTransactionsOfAccountBefore(accountId: Long, startDate: Date): LiveData<List<Transaction.Transference>>
+    internal abstract fun allTransferenceTransactionsOfAccountBefore(accountId: Long, startDate: Date): LiveData<List<Transaction.Transference>>
 
     @Query("select * from Credit where accountId = :accountId and category = :category and startDate <= :startDate")
-    fun allCreditTransactionsOfAccountWithCategoryBefore(accountId: Long, category: String, startDate: Date): LiveData<List<Transaction.Credit>>
+    internal abstract fun allCreditTransactionsOfAccountWithCategoryBefore(accountId: Long, category: String, startDate: Date): LiveData<List<Transaction.Credit>>
 
     @Query("select * from Debit where accountId = :accountId and category = :category and startDate <= :startDate")
-    fun allDebitTransactionsOfAccountWithCategoryBefore(accountId: Long, category: String, startDate: Date): LiveData<List<Transaction.Debit>>
+    internal abstract fun allDebitTransactionsOfAccountWithCategoryBefore(accountId: Long, category: String, startDate: Date): LiveData<List<Transaction.Debit>>
 
     @Query("select * from Transference where (accountId = :accountId or destinationAccountId = :accountId) and category = :category and startDate <= :startDate")
-    fun allTransferenceTransactionsOfAccountWithCategoryBefore(accountId: Long, category: String, startDate: Date): LiveData<List<Transaction.Transference>>
+    internal abstract fun allTransferenceTransactionsOfAccountWithCategoryBefore(accountId: Long, category: String, startDate: Date): LiveData<List<Transaction.Transference>>
+
+    infix fun totalBalanceAt(date: Date) =
+        Transformations.map(
+            allTransactionsBefore(date).before(date)
+        ) { repeatingTransactions ->
+            repeatingTransactions.sumByDouble { it.transaction.relativeValue }
+        } as LiveData<Double>
+
+    private infix fun allTransactionsBefore(date: Date) = MediatorLiveData<List<Transaction>>().apply {
+        var credits = listOf<Transaction.Credit>()
+        var debits = listOf<Transaction.Debit>()
+        var transferences = listOf<Transaction.Transference>()
+
+        fun union() = (credits + debits + transferences)
+
+        addSource(allCreditTransactionsBefore(date)) {
+            credits = it
+            value = union()
+        }
+        addSource(allDebitTransactionsBefore(date)) {
+            debits = it
+            value = union()
+        }
+        addSource(allTransferenceTransactionsBefore(date)) {
+            transferences = it
+            value = union()
+        }
+    } as LiveData<List<Transaction>>
+
+    private val Transaction.relativeValue get() = when(this) {
+        is Transaction.Credit -> value
+        is Transaction.Debit -> -value
+        is Transaction.Transference -> 0.0
+    }
 }

@@ -9,6 +9,7 @@ import br.edu.ifsp.scl.persistence.transaction.insert
 import org.hamcrest.CoreMatchers.*
 import java.util.*
 
+infix fun Any?.shouldBe(value: Any?) = shouldBeEqualTo(value)
 
 infix fun Any?.shouldBeEqualTo(value: Any?) = assertThat(this, equalTo(value))
 infix fun Any?.shouldBeDifferentFrom(value: Any?) = assertThat(this, not(value))
@@ -18,6 +19,8 @@ fun Iterable<Any>?.shouldContain(vararg items: Any?) = items.forEach { this shou
 
 infix fun Iterable<Any>?.shouldNotContain(item: Any?) = assertThat(this, not(hasItems(item)))
 fun Iterable<Any>?.shouldNotContain(vararg items: Any?) = items.forEach { this shouldNotContain it }
+
+infix fun <T, R> T.getting(outcome: T.() -> R): R = outcome()
 
 val <T> LiveData<T>.observedValue: T?
     get() {
