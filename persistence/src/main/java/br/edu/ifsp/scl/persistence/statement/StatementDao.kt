@@ -113,6 +113,19 @@ abstract class StatementDao {
     fun categoriesAmountsIn(range: Range<Date>, kind: TransactionKind) =
         transactionsIn(range, kind) sumOfValuesGroupedBy { it.category }
 
+    fun amountsIn(account: Account, range: Range<Date>) = transactionsIn(account, range) sumOfValuesGroupedBy {
+        when (it.transaction) {
+            is Credit -> RelativeTransactionKind.Credit
+            is Debit -> RelativeTransactionKind.Debit
+            is Transference ->
+                if (it.transaction kindRelativeTo account == Sent) RelativeTransactionKind.SentTransference
+                else RelativeTransactionKind.ReceivedTransference
+        }
+    }
+
+    fun categoriesAmountsIn(account: Account, range: Range<Date>, kind: RelativeTransactionKind) =
+        transactionsIn(account, range, kind) sumOfValuesGroupedBy { it.category }
+
     private infix fun <K> LiveData<List<RepeatingTransaction>>.sumOfValuesGroupedBy(chooser: (RepeatingTransaction) -> K) =
         Transformations.map(this) { repeatingTransactions ->
             repeatingTransactions
