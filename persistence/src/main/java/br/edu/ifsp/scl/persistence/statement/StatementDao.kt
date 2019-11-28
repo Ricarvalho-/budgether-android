@@ -101,6 +101,26 @@ abstract class StatementDao {
     }
     //endregion
 
+    //region Amounts in date range
+    infix fun amountsIn(range: Range<Date>) = transactionsIn(range) sumOfValuesGroupedBy {
+        when (it.transaction) {
+            is Credit -> TransactionKind.Credit
+            is Debit -> TransactionKind.Debit
+            is Transference -> TransactionKind.Transference
+        }
+    }
+
+    fun categoriesAmountsIn(range: Range<Date>, kind: TransactionKind) =
+        transactionsIn(range, kind) sumOfValuesGroupedBy { it.category }
+
+    private infix fun <K> LiveData<List<RepeatingTransaction>>.sumOfValuesGroupedBy(chooser: (RepeatingTransaction) -> K) =
+        Transformations.map(this) { repeatingTransactions ->
+            repeatingTransactions
+                .groupBy(chooser) { it.value }
+                .mapValues { it.value.sum() }
+        } as LiveData<Map<K, Double>>
+    //endregion
+
     //region Transactions in date range
     fun transactionsIn(range: Range<Date>, kind: TransactionKind? = null, categories: List<String>? = null) = when {
         kind == null -> allTransactionsBefore(range.upper)
