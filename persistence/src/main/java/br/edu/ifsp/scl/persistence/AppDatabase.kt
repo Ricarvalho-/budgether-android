@@ -1,6 +1,8 @@
 package br.edu.ifsp.scl.persistence
 
+import android.content.Context
 import androidx.room.Database
+import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import br.edu.ifsp.scl.persistence.account.Account
@@ -16,8 +18,20 @@ import br.edu.ifsp.scl.persistence.transaction.TransactionDao
     Transference::class
 ])
 @TypeConverters(Converters::class)
-abstract class Database : RoomDatabase() {
+abstract class AppDatabase : RoomDatabase() {
     abstract fun accountDao(): AccountDao
     abstract fun transactionDao(): TransactionDao
     abstract fun statementDao(): StatementDao
+
+    companion object {
+        @Volatile private var appDatabaseInstance: AppDatabase? = null
+
+        val Context.appDatabase: AppDatabase get() = synchronized(this@Companion) {
+            appDatabaseInstance ?: Room.databaseBuilder(
+                applicationContext,
+                AppDatabase::class.java,
+                "main_database"
+            ).build().also { appDatabaseInstance = it }
+        }
+    }
 }

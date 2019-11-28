@@ -18,7 +18,7 @@ abstract class DatabaseTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
 
-    private lateinit var db: Database
+    private lateinit var db: AppDatabase
     internal lateinit var transactionDao: TransactionDao
     internal lateinit var accountDao: AccountDao
     internal lateinit var statementDao: StatementDao
@@ -31,7 +31,7 @@ abstract class DatabaseTest {
 
     private fun createDb() {
         val context = ApplicationProvider.getApplicationContext<Context>()
-        db = Room.inMemoryDatabaseBuilder(context, Database::class.java).build()
+        db = Room.inMemoryDatabaseBuilder(context, AppDatabase::class.java).build()
     }
 
     private fun createDaos() {
