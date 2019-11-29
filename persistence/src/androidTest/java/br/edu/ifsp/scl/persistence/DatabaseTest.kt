@@ -35,9 +35,9 @@ abstract class DatabaseTest {
     }
 
     private fun createDaos() {
-        transactionDao = db.transactionDao()
-        accountDao = db.accountDao()
-        statementDao = db.statementDao()
+        transactionDao = db.transactionDao
+        accountDao = db.accountDao
+        statementDao = db.statementDao
     }
 
     @After

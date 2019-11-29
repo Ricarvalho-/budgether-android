@@ -19,16 +19,16 @@ import br.edu.ifsp.scl.persistence.transaction.TransactionDao
 ])
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
-    abstract fun accountDao(): AccountDao
-    abstract fun transactionDao(): TransactionDao
-    abstract fun statementDao(): StatementDao
+    abstract val accountDao: AccountDao
+    abstract val transactionDao: TransactionDao
+    abstract val statementDao: StatementDao
 
     companion object {
         @Volatile private var appDatabaseInstance: AppDatabase? = null
 
-        val Context.appDatabase: AppDatabase get() = synchronized(this@Companion) {
+        infix fun getWith(context: Context) = synchronized(this) {
             appDatabaseInstance ?: Room.databaseBuilder(
-                applicationContext,
+                context.applicationContext,
                 AppDatabase::class.java,
                 "main_database"
             ).build().also { appDatabaseInstance = it }
