@@ -5,6 +5,9 @@ import androidx.lifecycle.MediatorLiveData
 import androidx.room.*
 import br.edu.ifsp.scl.persistence.account.Account
 import br.edu.ifsp.scl.persistence.transaction.Transaction.*
+import java.util.*
+import kotlin.Comparator
+import kotlin.math.absoluteValue
 
 @Dao
 interface TransactionDao {
@@ -37,6 +40,17 @@ interface TransactionDao {
 
     @Query("select * from Transference where accountId = :accountId or destinationAccountId = :accountId")
     fun allTransferenceTransactionsOfAccount(accountId: Long): LiveData<List<Transference>>
+    //endregion
+
+    //region Most recent transaction
+    @Query("select *, abs(julianday() - julianday(startDate / 1000, 'unixepoch')) as distanceFromToday from Credit where accountId = :accountId order by distanceFromToday limit 1")
+    fun nearestCreditTransactionOfAccount(accountId: Long): LiveData<Credit>
+
+    @Query("select *, abs(julianday() - julianday(startDate / 1000, 'unixepoch')) as distanceFromToday from Debit where accountId = :accountId order by distanceFromToday limit 1")
+    fun nearestDebitTransactionOfAccount(accountId: Long): LiveData<Debit>
+
+    @Query("select *, abs(julianday() - julianday(startDate / 1000, 'unixepoch')) as distanceFromToday from Transference where (accountId = :accountId or destinationAccountId = :accountId) order by distanceFromToday limit 1")
+    fun nearestTransferenceTransactionOfAccount(accountId: Long): LiveData<Transference>
     //endregion
 
     //region Titles
@@ -137,6 +151,21 @@ fun TransactionDao.allTransactionsOf(account: Account) = MediatorLiveData<List<T
         value = sortedUnion()
     }
 } as LiveData<List<Transaction>>
+
+fun TransactionDao.nearestTransactionOf(account: Account) = MediatorLiveData<Transaction>().apply {
+    infix fun Transaction.orNearest(other: Transaction?): Transaction {
+        return if (other == null) this
+        else minOf(this, other, Comparator { t1, t2 ->
+            val t1Distance = t1.startDate.time - Date().time
+            val t2Distance = t2.startDate.time - Date().time
+            t1Distance.absoluteValue.compareTo(t2Distance.absoluteValue)
+        })
+    }
+
+    addSource(nearestCreditTransactionOfAccount(account.id)) { value = it orNearest value }
+    addSource(nearestDebitTransactionOfAccount(account.id)) { value = it orNearest value }
+    addSource(nearestTransferenceTransactionOfAccount(account.id)) { value = it orNearest value }
+} as LiveData<Transaction>
 
 suspend fun TransactionDao.update(transaction: Transaction) = when (transaction) {
     is Credit -> update(transaction)
