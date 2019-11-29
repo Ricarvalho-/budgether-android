@@ -1,4 +1,4 @@
-package br.edu.ifsp.scl.transaction
+package br.edu.ifsp.scl.transaction.details
 
 import android.content.Context
 import android.util.AttributeSet

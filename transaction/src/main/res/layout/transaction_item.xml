@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<br.edu.ifsp.scl.transaction.TransactionItemView xmlns:android="http://schemas.android.com/apk/res/android"
+<br.edu.ifsp.scl.transaction.list.TransactionItemView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -60,4 +60,4 @@
         android:orientation="vertical"
         app:layout_constraintGuide_begin="72dp" />
 
-</br.edu.ifsp.scl.transaction.TransactionItemView>
+</br.edu.ifsp.scl.transaction.list.TransactionItemView>

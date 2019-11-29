@@ -1,8 +1,12 @@
 <resources>
     <string name="app_name">Transaction</string>
+    <string name="category_field_placeholder">Category</string>
     <string name="title_field_placeholder">Title</string>
     <string name="value_field_placeholder">Value</string>
+    <string name="account_field_placeholder">Account</string>
+    <string name="recipient_account_field_placeholder">Recipient account</string>
     <string name="date_field_placeholder">Date</string>
     <string name="frequency_field_placeholder">Frequency</string>
     <string name="times_field_placeholder">Times</string>
+    <string name="swap_accounts_description">Swap accounts</string>
 </resources>
