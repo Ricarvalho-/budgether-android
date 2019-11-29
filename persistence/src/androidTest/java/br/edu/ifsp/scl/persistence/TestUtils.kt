@@ -8,6 +8,7 @@ import br.edu.ifsp.scl.persistence.account.Account
 import br.edu.ifsp.scl.persistence.transaction.Transaction
 import br.edu.ifsp.scl.persistence.transaction.Transaction.*
 import br.edu.ifsp.scl.persistence.transaction.insert
+import kotlinx.coroutines.runBlocking
 import org.hamcrest.CoreMatchers.*
 import java.util.*
 
@@ -60,11 +61,11 @@ fun date(day: Int, month: Int, year: Int) = Calendar.getInstance().run {
 } as Date
 
 fun DatabaseTest.insertAccount(title: String = defaultTitle) = Account(title).run {
-    copy(id = accountDao.insert(this))
+    runBlocking { copy(id = accountDao.insert(this@run)) }
 }
 
 fun <T : Transaction> DatabaseTest.insert(transaction: T): T {
-    val id = transactionDao.insert(transaction)
+    val id = runBlocking { transactionDao.insert(transaction) }
     val t = transaction as Transaction
     return when (t) {
         is Credit -> t.copy(id = id)

@@ -4,6 +4,7 @@ import br.edu.ifsp.scl.persistence.*
 import br.edu.ifsp.scl.persistence.account.Account
 import br.edu.ifsp.scl.persistence.transaction.Transaction.*
 import br.edu.ifsp.scl.persistence.transaction.Transaction.Transference.RelativeKind.*
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.util.*
@@ -79,7 +80,7 @@ class TransactionCRUDTest : DatabaseTest() {
         }
 
         val updatedTransaction = originalTransaction.run { copy(data.copy("Updated")) }
-        transactionDao.update(updatedTransaction)
+        runBlocking { transactionDao.update(updatedTransaction) }
         transactionDao.allTransactions().observedValue?.first()?.let {
             it shouldBeDifferentFrom originalTransaction
             it shouldBeEqualTo updatedTransaction
@@ -103,7 +104,7 @@ class TransactionCRUDTest : DatabaseTest() {
     fun insertedTransactionsShouldDisappearAfterDeletion() {
         val data = sampleTransactionData(insertAccount())
         val transaction = insert(Credit(data))
-        transactionDao.delete(transaction)
+        runBlocking { transactionDao.delete(transaction) }
         assertTrue(transactionDao.allTransactions().observedValue?.isEmpty() ?: false)
     }
 
@@ -116,7 +117,7 @@ class TransactionCRUDTest : DatabaseTest() {
         val destinationAccount = insertAccount()
         val transference = insert(Transference(data, destinationAccount.id))
 
-        accountDao.delete(destinationAccount)
+        runBlocking { accountDao.delete(destinationAccount) }
 
         transactionDao.allTransactions().observedValue?.shouldContain(credit, debit)
         transactionDao.allTransactions().observedValue?.shouldNotContain(transference)

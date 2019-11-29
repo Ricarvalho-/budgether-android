@@ -8,15 +8,18 @@ import br.edu.ifsp.scl.persistence.transaction.Transaction.*
 
 @Dao
 interface TransactionDao {
+    //region Insert
     @Insert
-    fun insert(credit: Credit): Long
+    suspend fun insert(credit: Credit): Long
 
     @Insert
-    fun insert(debit: Debit): Long
+    suspend fun insert(debit: Debit): Long
 
     @Insert
-    fun insert(transference: Transference): Long
+    suspend fun insert(transference: Transference): Long
+    //endregion
 
+    //region All transactions
     @Query("select * from Credit")
     fun allCreditTransactions(): LiveData<List<Credit>>
 
@@ -34,7 +37,9 @@ interface TransactionDao {
 
     @Query("select * from Transference where accountId = :accountId or destinationAccountId = :accountId")
     fun allTransferenceTransactionsOfAccount(accountId: Long): LiveData<List<Transference>>
+    //endregion
 
+    //region Titles
     @Query("select distinct title from Credit where title like '%'||:like||'%' order by title")
     fun allCreditTitles(like: String = ""): LiveData<List<String>>
 
@@ -43,7 +48,9 @@ interface TransactionDao {
 
     @Query("select distinct title from Transference where title like '%'||:like||'%' order by title")
     fun allTransferenceTitles(like: String = ""): LiveData<List<String>>
+    //endregion
 
+    //region Categories
     @Query("select distinct category from Credit where category like '%'||:like||'%' order by category")
     fun allCreditCategories(like: String = ""): LiveData<List<String>>
 
@@ -58,27 +65,32 @@ interface TransactionDao {
 
     @Query("select category from Credit where accountId = :accountId union select category from Debit where accountId = :accountId union select category from Transference where accountId = :accountId or destinationAccountId = :accountId order by category")
     fun allTransactionCategoriesOfAccount(accountId: Long): LiveData<List<String>>
+    //endregion
+
+    //region Update
+    @Update
+    suspend fun update(credit: Credit)
 
     @Update
-    fun update(credit: Credit)
+    suspend fun update(debit: Debit)
 
     @Update
-    fun update(debit: Debit)
+    suspend fun update(transference: Transference)
+    //endregion
 
-    @Update
-    fun update(transference: Transference)
+    //region Delete
+    @Delete
+    suspend fun delete(credit: Credit)
 
     @Delete
-    fun delete(credit: Credit)
+    suspend fun delete(debit: Debit)
 
     @Delete
-    fun delete(debit: Debit)
-
-    @Delete
-    fun delete(transference: Transference)
+    suspend fun delete(transference: Transference)
+    //endregion
 }
 
-fun TransactionDao.insert(transaction: Transaction) = when (transaction) {
+suspend fun TransactionDao.insert(transaction: Transaction) = when (transaction) {
     is Credit -> insert(transaction)
     is Debit -> insert(transaction)
     is Transference -> insert(transaction)
@@ -126,13 +138,13 @@ fun TransactionDao.allTransactionsOf(account: Account) = MediatorLiveData<List<T
     }
 } as LiveData<List<Transaction>>
 
-fun TransactionDao.update(transaction: Transaction) = when (transaction) {
+suspend fun TransactionDao.update(transaction: Transaction) = when (transaction) {
     is Credit -> update(transaction)
     is Debit -> update(transaction)
     is Transference -> update(transaction)
 }
 
-fun TransactionDao.delete(transaction: Transaction) = when (transaction) {
+suspend fun TransactionDao.delete(transaction: Transaction) = when (transaction) {
     is Credit -> delete(transaction)
     is Debit -> delete(transaction)
     is Transference -> delete(transaction)

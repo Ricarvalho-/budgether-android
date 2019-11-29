@@ -2,6 +2,7 @@ package br.edu.ifsp.scl.persistence.account
 
 import br.edu.ifsp.scl.persistence.*
 import junit.framework.AssertionFailedError
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -45,7 +46,7 @@ class AccountCRUDTest : DatabaseTest() {
         }
 
         val updatedAccount = originalAccount.copy(title = "Updated")
-        accountDao.update(updatedAccount)
+        runBlocking { accountDao.update(updatedAccount) }
         accountDao.allAccounts().observedValue?.first()?.let {
             it shouldBeDifferentFrom originalAccount
             it shouldBeEqualTo updatedAccount
@@ -55,7 +56,7 @@ class AccountCRUDTest : DatabaseTest() {
     @Test
     fun insertedAccountsShouldDisappearAfterDeletion() {
         val account = insertAccount()
-        accountDao.delete(account)
+        runBlocking { accountDao.delete(account) }
         assertTrue(accountDao.allAccounts().observedValue?.isEmpty() ?: false)
     }
 }
