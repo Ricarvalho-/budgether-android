@@ -1,0 +1,386 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "6a1826127f5c407191c51b77ad075a9a",
+    "entities": [
+      {
+        "tableName": "AccountEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`title` TEXT NOT NULL, `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "CreditEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT NOT NULL, `category` TEXT NOT NULL, `value` REAL NOT NULL, `startDate` INTEGER NOT NULL, `frequency` INTEGER NOT NULL, `repeat` INTEGER NOT NULL, `accountId` INTEGER NOT NULL, FOREIGN KEY(`accountId`) REFERENCES `AccountEntity`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "data.title",
+            "columnName": "title",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "data.category",
+            "columnName": "category",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "data.value",
+            "columnName": "value",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "data.startDate",
+            "columnName": "startDate",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "data.frequency",
+            "columnName": "frequency",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "data.repeat",
+            "columnName": "repeat",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "data.accountId",
+            "columnName": "accountId",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_CreditEntity_title",
+            "unique": false,
+            "columnNames": [
+              "title"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_CreditEntity_title` ON `${TABLE_NAME}` (`title`)"
+          },
+          {
+            "name": "index_CreditEntity_category",
+            "unique": false,
+            "columnNames": [
+              "category"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_CreditEntity_category` ON `${TABLE_NAME}` (`category`)"
+          },
+          {
+            "name": "index_CreditEntity_startDate",
+            "unique": false,
+            "columnNames": [
+              "startDate"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_CreditEntity_startDate` ON `${TABLE_NAME}` (`startDate`)"
+          },
+          {
+            "name": "index_CreditEntity_accountId",
+            "unique": false,
+            "columnNames": [
+              "accountId"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_CreditEntity_accountId` ON `${TABLE_NAME}` (`accountId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "AccountEntity",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "accountId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "DebitEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT NOT NULL, `category` TEXT NOT NULL, `value` REAL NOT NULL, `startDate` INTEGER NOT NULL, `frequency` INTEGER NOT NULL, `repeat` INTEGER NOT NULL, `accountId` INTEGER NOT NULL, FOREIGN KEY(`accountId`) REFERENCES `AccountEntity`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "data.title",
+            "columnName": "title",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "data.category",
+            "columnName": "category",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "data.value",
+            "columnName": "value",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "data.startDate",
+            "columnName": "startDate",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "data.frequency",
+            "columnName": "frequency",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "data.repeat",
+            "columnName": "repeat",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "data.accountId",
+            "columnName": "accountId",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_DebitEntity_title",
+            "unique": false,
+            "columnNames": [
+              "title"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_DebitEntity_title` ON `${TABLE_NAME}` (`title`)"
+          },
+          {
+            "name": "index_DebitEntity_category",
+            "unique": false,
+            "columnNames": [
+              "category"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_DebitEntity_category` ON `${TABLE_NAME}` (`category`)"
+          },
+          {
+            "name": "index_DebitEntity_startDate",
+            "unique": false,
+            "columnNames": [
+              "startDate"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_DebitEntity_startDate` ON `${TABLE_NAME}` (`startDate`)"
+          },
+          {
+            "name": "index_DebitEntity_accountId",
+            "unique": false,
+            "columnNames": [
+              "accountId"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_DebitEntity_accountId` ON `${TABLE_NAME}` (`accountId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "AccountEntity",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "accountId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "TransferenceEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`recipientAccountId` INTEGER NOT NULL, `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT NOT NULL, `category` TEXT NOT NULL, `value` REAL NOT NULL, `startDate` INTEGER NOT NULL, `frequency` INTEGER NOT NULL, `repeat` INTEGER NOT NULL, `accountId` INTEGER NOT NULL, FOREIGN KEY(`accountId`) REFERENCES `AccountEntity`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`recipientAccountId`) REFERENCES `AccountEntity`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "recipientAccountId",
+            "columnName": "recipientAccountId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "data.title",
+            "columnName": "title",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "data.category",
+            "columnName": "category",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "data.value",
+            "columnName": "value",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "data.startDate",
+            "columnName": "startDate",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "data.frequency",
+            "columnName": "frequency",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "data.repeat",
+            "columnName": "repeat",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "data.accountId",
+            "columnName": "accountId",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_TransferenceEntity_recipientAccountId",
+            "unique": false,
+            "columnNames": [
+              "recipientAccountId"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_TransferenceEntity_recipientAccountId` ON `${TABLE_NAME}` (`recipientAccountId`)"
+          },
+          {
+            "name": "index_TransferenceEntity_title",
+            "unique": false,
+            "columnNames": [
+              "title"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_TransferenceEntity_title` ON `${TABLE_NAME}` (`title`)"
+          },
+          {
+            "name": "index_TransferenceEntity_category",
+            "unique": false,
+            "columnNames": [
+              "category"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_TransferenceEntity_category` ON `${TABLE_NAME}` (`category`)"
+          },
+          {
+            "name": "index_TransferenceEntity_startDate",
+            "unique": false,
+            "columnNames": [
+              "startDate"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_TransferenceEntity_startDate` ON `${TABLE_NAME}` (`startDate`)"
+          },
+          {
+            "name": "index_TransferenceEntity_accountId",
+            "unique": false,
+            "columnNames": [
+              "accountId"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_TransferenceEntity_accountId` ON `${TABLE_NAME}` (`accountId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "AccountEntity",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "accountId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "AccountEntity",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "recipientAccountId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6a1826127f5c407191c51b77ad075a9a')"
+    ]
+  }
+}
