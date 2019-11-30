@@ -6,124 +6,119 @@ import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.Transformations
 import androidx.room.Dao
 import androidx.room.Query
-import br.edu.ifsp.scl.persistence.account.Account
-import br.edu.ifsp.scl.persistence.transaction.RepeatingTransaction
-import br.edu.ifsp.scl.persistence.transaction.Transaction
-import br.edu.ifsp.scl.persistence.transaction.Transaction.*
-import br.edu.ifsp.scl.persistence.transaction.Transaction.Transference.RelativeKind.*
-import br.edu.ifsp.scl.persistence.transaction.repeatingWhenAffect
-import br.edu.ifsp.scl.persistence.transaction.repeatingBefore
+import br.edu.ifsp.scl.persistence.account.AccountData
+import br.edu.ifsp.scl.persistence.statement.StatementProvider.RelativeTransactionKind
+import br.edu.ifsp.scl.persistence.transaction.*
+import br.edu.ifsp.scl.persistence.transaction.TransactionData.Kind
+import br.edu.ifsp.scl.persistence.transaction.TransactionData.Kind.*
+import br.edu.ifsp.scl.persistence.transaction.TransactionEntity.*
+import br.edu.ifsp.scl.persistence.transaction.TransferenceData.RelativeKind.*
 import java.util.*
 
 @Dao
-abstract class StatementDao {
+internal abstract class StatementDao : StatementProvider {
     //region All accounts selects
-    @Query("select * from Credit where startDate <= :startDate")
-    internal abstract fun allCreditTransactionsBefore(startDate: Date): LiveData<List<Credit>>
+    @Query("select * from CreditEntity where startDate <= :startDate")
+    abstract fun allCreditTransactionsBefore(startDate: Date): LiveData<List<CreditEntity>>
 
-    @Query("select * from Debit where startDate <= :startDate")
-    internal abstract fun allDebitTransactionsBefore(startDate: Date): LiveData<List<Debit>>
+    @Query("select * from DebitEntity where startDate <= :startDate")
+    abstract fun allDebitTransactionsBefore(startDate: Date): LiveData<List<DebitEntity>>
 
-    @Query("select * from Transference where startDate <= :startDate")
-    internal abstract fun allTransferenceTransactionsBefore(startDate: Date): LiveData<List<Transference>>
+    @Query("select * from TransferenceEntity where startDate <= :startDate")
+    abstract fun allTransferenceTransactionsBefore(startDate: Date): LiveData<List<TransferenceEntity>>
 
     //region With category
-    @Query("select * from Credit where category in (:categories) and startDate <= :startDate")
-    internal abstract fun allCreditTransactionsWithCategoriesBefore(categories: List<String>, startDate: Date): LiveData<List<Credit>>
+    @Query("select * from CreditEntity where category in (:categories) and startDate <= :startDate")
+    abstract fun allCreditTransactionsWithCategoriesBefore(categories: List<String>, startDate: Date): LiveData<List<CreditEntity>>
 
-    @Query("select * from Debit where category in (:categories) and startDate <= :startDate")
-    internal abstract fun allDebitTransactionsWithCategoriesBefore(categories: List<String>, startDate: Date): LiveData<List<Debit>>
+    @Query("select * from DebitEntity where category in (:categories) and startDate <= :startDate")
+    abstract fun allDebitTransactionsWithCategoriesBefore(categories: List<String>, startDate: Date): LiveData<List<DebitEntity>>
 
-    @Query("select * from Transference where category in (:categories) and startDate <= :startDate")
-    internal abstract fun allTransferenceTransactionsWithCategoriesBefore(categories: List<String>, startDate: Date): LiveData<List<Transference>>
+    @Query("select * from TransferenceEntity where category in (:categories) and startDate <= :startDate")
+    abstract fun allTransferenceTransactionsWithCategoriesBefore(categories: List<String>, startDate: Date): LiveData<List<TransferenceEntity>>
     //endregion
     //endregion
 
     //region Specific account selects
-    @Query("select * from Credit where accountId = :accountId and startDate <= :startDate")
-    internal abstract fun allCreditTransactionsOfAccountBefore(accountId: Long, startDate: Date): LiveData<List<Credit>>
+    @Query("select * from CreditEntity where accountId = :accountId and startDate <= :startDate")
+    abstract fun allCreditTransactionsOfAccountBefore(accountId: Long, startDate: Date): LiveData<List<CreditEntity>>
 
-    @Query("select * from Debit where accountId = :accountId and startDate <= :startDate")
-    internal abstract fun allDebitTransactionsOfAccountBefore(accountId: Long, startDate: Date): LiveData<List<Debit>>
+    @Query("select * from DebitEntity where accountId = :accountId and startDate <= :startDate")
+    abstract fun allDebitTransactionsOfAccountBefore(accountId: Long, startDate: Date): LiveData<List<DebitEntity>>
 
-    @Query("select * from Transference where (accountId = :accountId or destinationAccountId = :accountId) and startDate <= :startDate")
-    internal abstract fun allTransferenceTransactionsOfAccountBefore(accountId: Long, startDate: Date): LiveData<List<Transference>>
+    @Query("select * from TransferenceEntity where (accountId = :accountId or recipientAccountId = :accountId) and startDate <= :startDate")
+    abstract fun allTransferenceTransactionsOfAccountBefore(accountId: Long, startDate: Date): LiveData<List<TransferenceEntity>>
 
-    @Query("select * from Transference where accountId = :accountId and startDate <= :startDate")
-    internal abstract fun allSentTransferenceTransactionsOfAccountBefore(accountId: Long, startDate: Date): LiveData<List<Transference>>
+    @Query("select * from TransferenceEntity where accountId = :accountId and startDate <= :startDate")
+    abstract fun allSentTransferenceTransactionsOfAccountBefore(accountId: Long, startDate: Date): LiveData<List<TransferenceEntity>>
 
-    @Query("select * from Transference where destinationAccountId = :accountId and startDate <= :startDate")
-    internal abstract fun allReceivedTransferenceTransactionsOfAccountBefore(accountId: Long, startDate: Date): LiveData<List<Transference>>
+    @Query("select * from TransferenceEntity where recipientAccountId = :accountId and startDate <= :startDate")
+    abstract fun allReceivedTransferenceTransactionsOfAccountBefore(accountId: Long, startDate: Date): LiveData<List<TransferenceEntity>>
 
     //region With category
-    @Query("select * from Credit where accountId = :accountId and category in (:categories) and startDate <= :startDate")
-    internal abstract fun allCreditTransactionsOfAccountWithCategoriesBefore(accountId: Long, categories: List<String>, startDate: Date): LiveData<List<Credit>>
+    @Query("select * from CreditEntity where accountId = :accountId and category in (:categories) and startDate <= :startDate")
+    abstract fun allCreditTransactionsOfAccountWithCategoriesBefore(accountId: Long, categories: List<String>, startDate: Date): LiveData<List<CreditEntity>>
 
-    @Query("select * from Debit where accountId = :accountId and category in (:categories) and startDate <= :startDate")
-    internal abstract fun allDebitTransactionsOfAccountWithCategoriesBefore(accountId: Long, categories: List<String>, startDate: Date): LiveData<List<Debit>>
+    @Query("select * from DebitEntity where accountId = :accountId and category in (:categories) and startDate <= :startDate")
+    abstract fun allDebitTransactionsOfAccountWithCategoriesBefore(accountId: Long, categories: List<String>, startDate: Date): LiveData<List<DebitEntity>>
 
-    @Query("select * from Transference where accountId = :accountId and category in (:categories) and startDate <= :startDate")
-    internal abstract fun allSentTransferenceTransactionsOfAccountWithCategoriesBefore(accountId: Long, categories: List<String>, startDate: Date): LiveData<List<Transference>>
+    @Query("select * from TransferenceEntity where accountId = :accountId and category in (:categories) and startDate <= :startDate")
+    abstract fun allSentTransferenceTransactionsOfAccountWithCategoriesBefore(accountId: Long, categories: List<String>, startDate: Date): LiveData<List<TransferenceEntity>>
 
-    @Query("select * from Transference where destinationAccountId = :accountId and category in (:categories) and startDate <= :startDate")
-    internal abstract fun allReceivedTransferenceTransactionsOfAccountWithCategoriesBefore(accountId: Long, categories: List<String>, startDate: Date): LiveData<List<Transference>>
+    @Query("select * from TransferenceEntity where recipientAccountId = :accountId and category in (:categories) and startDate <= :startDate")
+    abstract fun allReceivedTransferenceTransactionsOfAccountWithCategoriesBefore(accountId: Long, categories: List<String>, startDate: Date): LiveData<List<TransferenceEntity>>
     //endregion
     //endregion
 
     //region Balance at date
-    infix fun totalBalanceAt(date: Date) =
+    override infix fun totalBalanceAt(date: Date) =
         Transformations.map(
-            allTransactionsBefore(date) repeatingBefore date
+            getAllTransactionsBefore(date) repeatingBefore date
         ) { repeatingTransactions ->
-            repeatingTransactions.sumByDouble { it.transaction.relativeValue }
+            repeatingTransactions.sumByDouble { it.relativeValue }
         } as LiveData<Double>
 
-    fun balanceAt(account: Account, date: Date): LiveData<Double> =
+    override fun balanceAt(account: AccountData, date: Date): LiveData<Double> =
         Transformations.map(
-            account allTransactionsBefore date repeatingBefore date
+            account getAllTransactionsBefore date repeatingBefore date
         ) { repeatingTransactions ->
-            repeatingTransactions.sumByDouble { it.transaction relativeValueTo account }
+            repeatingTransactions.sumByDouble { it relativeValueTo account }
         } as LiveData<Double>
 
-    private infix fun Transaction.relativeValueTo(account: Account) =
-        if (this is Transference)
-            when (this kindRelativeTo account) {
+    private infix fun RepeatingTransaction.relativeValueTo(account: AccountData) =
+        if (this.transaction is TransferenceEntity)
+            when (this.transaction kindRelativeTo account) {
                 Sent -> -value
                 Received -> value
                 Unrelated -> 0.0
             }
         else relativeValue
 
-    private val Transaction.relativeValue get() = when (this) {
-        is Credit -> value
-        is Debit -> -value
-        is Transference -> 0.0
+    private val RepeatingTransaction.relativeValue get() = when (kind) {
+        Credit -> value
+        Debit -> -value
+        Transfer -> 0.0
     }
     //endregion
 
     //region Amounts in date range
-    infix fun amountsIn(range: Range<Date>) = transactionsIn(range) sumOfValuesGroupedBy {
-        when (it.transaction) {
-            is Credit -> TransactionKind.Credit
-            is Debit -> TransactionKind.Debit
-            is Transference -> TransactionKind.Transference
-        }
-    }
+    override infix fun amountsIn(range: Range<Date>) =
+        transactionsIn(range) sumOfValuesGroupedBy { it.kind }
 
-    fun categoriesAmountsIn(range: Range<Date>, kind: TransactionKind) =
+    override fun categoriesAmountsIn(range: Range<Date>, kind: Kind) =
         transactionsIn(range, kind) sumOfValuesGroupedBy { it.category }
 
-    fun amountsIn(account: Account, range: Range<Date>) = transactionsIn(account, range) sumOfValuesGroupedBy {
-        when (it.transaction) {
-            is Credit -> RelativeTransactionKind.Credit
-            is Debit -> RelativeTransactionKind.Debit
-            is Transference ->
-                if (it.transaction kindRelativeTo account == Sent) RelativeTransactionKind.SentTransference
+    override fun amountsIn(account: AccountData, range: Range<Date>) = transactionsIn(account, range) sumOfValuesGroupedBy {
+        when (it.kind) {
+            Credit -> RelativeTransactionKind.Credit
+            Debit -> RelativeTransactionKind.Debit
+            Transfer ->
+                if (it.transaction as TransferenceData kindRelativeTo account == Sent) RelativeTransactionKind.SentTransference
                 else RelativeTransactionKind.ReceivedTransference
         }
     }
 
-    fun categoriesAmountsIn(account: Account, range: Range<Date>, kind: RelativeTransactionKind) =
+    override fun categoriesAmountsIn(account: AccountData, range: Range<Date>, kind: RelativeTransactionKind) =
         transactionsIn(account, range, kind) sumOfValuesGroupedBy { it.category }
 
     private infix fun <K> LiveData<List<RepeatingTransaction>>.sumOfValuesGroupedBy(chooser: (RepeatingTransaction) -> K) =
@@ -135,38 +130,38 @@ abstract class StatementDao {
     //endregion
 
     //region Transactions in date range
-    fun transactionsIn(range: Range<Date>, kind: TransactionKind? = null, categories: List<String>? = null) = when {
-        kind == null -> allTransactionsBefore(range.upper)
+    override fun transactionsIn(range: Range<Date>, kind: Kind?, categories: List<String>?) = when {
+        kind == null -> getAllTransactionsBefore(range.upper)
         categories == null || categories.isEmpty() -> transactionsOfKindBefore(kind, range.upper)
         else -> transactionsOfKindWithCategoriesBefore(kind, categories, range.upper)
     } repeatingWhenAffect range
 
-    private fun transactionsOfKindBefore(kind: TransactionKind, date: Date) = when (kind) {
-        TransactionKind.Credit -> allCreditTransactionsBefore(date)
-        TransactionKind.Debit -> allDebitTransactionsBefore(date)
-        TransactionKind.Transference -> allTransferenceTransactionsBefore(date)
+    private fun transactionsOfKindBefore(kind: Kind, date: Date) = when (kind) {
+        Credit -> allCreditTransactionsBefore(date)
+        Debit -> allDebitTransactionsBefore(date)
+        Transfer -> allTransferenceTransactionsBefore(date)
     }
 
-    private fun transactionsOfKindWithCategoriesBefore(kind: TransactionKind, categories: List<String>, date: Date) = when (kind) {
-        TransactionKind.Credit -> allCreditTransactionsWithCategoriesBefore(categories, date)
-        TransactionKind.Debit -> allDebitTransactionsWithCategoriesBefore(categories, date)
-        TransactionKind.Transference -> allTransferenceTransactionsWithCategoriesBefore(categories, date)
+    private fun transactionsOfKindWithCategoriesBefore(kind: Kind, categories: List<String>, date: Date) = when (kind) {
+        Credit -> allCreditTransactionsWithCategoriesBefore(categories, date)
+        Debit -> allDebitTransactionsWithCategoriesBefore(categories, date)
+        Transfer -> allTransferenceTransactionsWithCategoriesBefore(categories, date)
     }
 
-    fun transactionsIn(account: Account, range: Range<Date>, kind: RelativeTransactionKind? = null, categories: List<String>? = null) = when {
-        kind == null -> account allTransactionsBefore range.upper
+    override fun transactionsIn(account: AccountData, range: Range<Date>, kind: RelativeTransactionKind?, categories: List<String>?) = when {
+        kind == null -> account getAllTransactionsBefore range.upper
         categories == null || categories.isEmpty() -> account.transactionsOfKindBefore(kind, range.upper)
         else -> account.transactionsOfKindWithCategoriesBefore(kind, categories, range.upper)
     } repeatingWhenAffect range
 
-    private fun Account.transactionsOfKindBefore(kind: RelativeTransactionKind, date: Date) = when (kind) {
+    private fun AccountData.transactionsOfKindBefore(kind: RelativeTransactionKind, date: Date) = when (kind) {
         RelativeTransactionKind.Credit -> allCreditTransactionsOfAccountBefore(id, date)
         RelativeTransactionKind.Debit -> allDebitTransactionsOfAccountBefore(id, date)
         RelativeTransactionKind.SentTransference -> allSentTransferenceTransactionsOfAccountBefore(id, date)
         RelativeTransactionKind.ReceivedTransference -> allReceivedTransferenceTransactionsOfAccountBefore(id, date)
     }
 
-    private fun Account.transactionsOfKindWithCategoriesBefore(kind: RelativeTransactionKind, categories: List<String>, date: Date) = when (kind) {
+    private fun AccountData.transactionsOfKindWithCategoriesBefore(kind: RelativeTransactionKind, categories: List<String>, date: Date) = when (kind) {
         RelativeTransactionKind.Credit -> allCreditTransactionsOfAccountWithCategoriesBefore(id, categories, date)
         RelativeTransactionKind.Debit -> allDebitTransactionsOfAccountWithCategoriesBefore(id, categories, date)
         RelativeTransactionKind.SentTransference -> allSentTransferenceTransactionsOfAccountWithCategoriesBefore(id, categories, date)
@@ -175,10 +170,10 @@ abstract class StatementDao {
     //endregion
 
     //region Common
-    private infix fun allTransactionsBefore(date: Date) = MediatorLiveData<List<Transaction>>().apply {
-        var credits = listOf<Credit>()
-        var debits = listOf<Debit>()
-        var transfers = listOf<Transference>()
+    private infix fun getAllTransactionsBefore(date: Date) = MediatorLiveData<List<TransactionEntity>>().apply {
+        var credits = listOf<CreditEntity>()
+        var debits = listOf<DebitEntity>()
+        var transfers = listOf<TransferenceEntity>()
 
         fun union() = (credits + debits + transfers)
 
@@ -194,12 +189,15 @@ abstract class StatementDao {
             transfers = it
             value = union()
         }
-    } as LiveData<List<Transaction>>
+    } as LiveData<List<TransactionEntity>>
 
-    private infix fun Account.allTransactionsBefore(date: Date) = MediatorLiveData<List<Transaction>>().apply {
-        var credits = listOf<Credit>()
-        var debits = listOf<Debit>()
-        var transfers = listOf<Transference>()
+    override fun AccountData.allTransactionsBefore(date: Date): LiveData<List<RepeatingTransaction>> =
+        this getAllTransactionsBefore date repeatingBefore date
+
+    private infix fun AccountData.getAllTransactionsBefore(date: Date) = MediatorLiveData<List<TransactionEntity>>().apply {
+        var credits = listOf<CreditEntity>()
+        var debits = listOf<DebitEntity>()
+        var transfers = listOf<TransferenceEntity>()
 
         fun union() = (credits + debits + transfers)
 
@@ -215,9 +213,6 @@ abstract class StatementDao {
             transfers = it
             value = union()
         }
-    } as LiveData<List<Transaction>>
-
-    enum class TransactionKind { Credit, Debit, Transference }
-    enum class RelativeTransactionKind { Credit, Debit, SentTransference, ReceivedTransference }
+    } as LiveData<List<TransactionEntity>>
     //endregion
 }

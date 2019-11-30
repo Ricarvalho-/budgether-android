@@ -4,21 +4,23 @@ import android.util.Range
 import androidx.core.util.rangeTo
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Transformations
-import br.edu.ifsp.scl.persistence.transaction.Repeatability.Many.Times.*
-import br.edu.ifsp.scl.persistence.transaction.Transaction.Frequency.*
+import br.edu.ifsp.scl.persistence.transaction.Repeatability.Many.Times.Determinate
+import br.edu.ifsp.scl.persistence.transaction.Repeatability.Many.Times.Indeterminate
+import br.edu.ifsp.scl.persistence.transaction.TransactionData.Frequency
+import br.edu.ifsp.scl.persistence.transaction.TransactionData.Frequency.*
 import java.util.*
 
-infix fun <T : Transaction> LiveData<out List<T>>.repeatingBefore(date: Date) = Transformations.map(this) { items ->
+internal infix fun <T : TransactionEntity> LiveData<out List<T>>.repeatingBefore(date: Date) = Transformations.map(this) { items ->
     items.flatMap { it.repeatWhileAffecting(it.startDate.coerceAtMost(date) rangeTo date) }
         .sortedBy { it.atDate }
 } as LiveData<List<RepeatingTransaction>>
 
-infix fun <T : Transaction> LiveData<out List<T>>.repeatingWhenAffect(dateRange: Range<Date>) = Transformations.map(this) { items ->
+internal infix fun <T : TransactionEntity> LiveData<out List<T>>.repeatingWhenAffect(dateRange: Range<Date>) = Transformations.map(this) { items ->
     items.flatMap { it.repeatWhileAffecting(dateRange) }
         .sortedBy { it.atDate }
 } as LiveData<List<RepeatingTransaction>>
 
-private infix fun Transaction.repeatWhileAffecting(dateRange: Range<Date>) = sequence {
+private infix fun TransactionEntity.repeatWhileAffecting(dateRange: Range<Date>) = sequence {
     var currentDate = startDate
     var currentRepetition = 1
 
@@ -44,7 +46,7 @@ private infix fun Transaction.repeatWhileAffecting(dateRange: Range<Date>) = seq
     }
 }.toList()
 
-private fun Date.shiftedBy(frequency: Transaction.Frequency, amount: Int) = when (frequency) {
+private fun Date.shiftedBy(frequency: Frequency, amount: Int) = when (frequency) {
     Single -> this
     Daily -> this plusDays amount
     Weekly -> this plusWeeks amount
@@ -58,7 +60,7 @@ private infix fun Date.plusMonths(amount: Int) = calendar.apply { add(Calendar.M
 private infix fun Date.plusYears(amount: Int) = calendar.apply { add(Calendar.YEAR, amount) }.time
 private val Date.calendar get() = Calendar.getInstance().also { it.time = this }
 
-data class RepeatingTransaction(val transaction: Transaction, val atDate: Date, private val number: Int) : TransactionData by transaction {
+data class RepeatingTransaction(val transaction: TransactionData, val atDate: Date, private val number: Int) : TransactionData by transaction {
     val repeatability by lazy {
         when (transaction.frequency) {
             Single -> Repeatability.Single

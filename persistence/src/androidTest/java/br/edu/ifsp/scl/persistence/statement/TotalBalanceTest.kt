@@ -1,7 +1,8 @@
 package br.edu.ifsp.scl.persistence.statement
 
 import br.edu.ifsp.scl.persistence.*
-import br.edu.ifsp.scl.persistence.transaction.Transaction
+import br.edu.ifsp.scl.persistence.transaction.TransactionData.Frequency.Daily
+import br.edu.ifsp.scl.persistence.transaction.TransactionData.Frequency.Weekly
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.util.*
@@ -48,14 +49,14 @@ class TotalBalanceTest : DatabaseTest() {
 
     @Test
     fun totalBalanceAfterTransactionDateShouldConsiderRepetitionAndFrequency() {
-        credit(repeating = Transaction.Frequency.Daily, during = 5)
+        credit(repeating = Daily, during = 5)
         totalBalanceAt(date(6, 1, 2020)) shouldBe defaultValue * 5
     }
 
     @Test
     fun totalBalanceShouldConsiderRepeatingTransactionsWithDifferentFrequencies() {
-        credit(repeating = Transaction.Frequency.Daily, during = 5)
-        debit(repeating = Transaction.Frequency.Weekly, during = 3)
+        credit(repeating = Daily, during = 5)
+        debit(repeating = Weekly, during = 3)
         totalBalanceAt(date(16, 1, 2020)) shouldBe defaultValue * (5 - 3)
 
     }

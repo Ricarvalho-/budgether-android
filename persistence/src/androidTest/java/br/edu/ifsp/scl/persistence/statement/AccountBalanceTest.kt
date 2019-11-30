@@ -1,17 +1,18 @@
 package br.edu.ifsp.scl.persistence.statement
 
 import br.edu.ifsp.scl.persistence.*
-import br.edu.ifsp.scl.persistence.account.Account
-import br.edu.ifsp.scl.persistence.transaction.Transaction
+import br.edu.ifsp.scl.persistence.account.AccountEntity
+import br.edu.ifsp.scl.persistence.transaction.TransactionData.Frequency.Daily
+import br.edu.ifsp.scl.persistence.transaction.TransactionData.Frequency.Weekly
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import java.util.*
 
 class AccountBalanceTest : DatabaseTest() {
-    private lateinit var account: Account
-    private val Account.currentTotalBalance get() = totalBalanceAt(defaultDate)
-    private infix fun Account.totalBalanceAt(date: Date) = statementDao.balanceAt(this, date) getting { observedValue!! }
+    private lateinit var account: AccountEntity
+    private val AccountEntity.currentTotalBalance get() = totalBalanceAt(defaultDate)
+    private infix fun AccountEntity.totalBalanceAt(date: Date) = statementDao.balanceAt(this, date) getting { observedValue!! }
 
     @Before
     fun createAccount() {
@@ -64,14 +65,14 @@ class AccountBalanceTest : DatabaseTest() {
 
     @Test
     fun accountBalanceAfterTransactionDateShouldConsiderRepetitionAndFrequency() {
-        credit(into = account, repeating = Transaction.Frequency.Daily, during = 5)
+        credit(into = account, repeating = Daily, during = 5)
         account totalBalanceAt date(6, 1, 2020) shouldBe defaultValue * 5
     }
 
     @Test
     fun accountBalanceShouldConsiderRepeatingTransactionsWithDifferentFrequencies() {
-        credit(into = account, repeating = Transaction.Frequency.Daily, during = 5)
-        debit(from = account, repeating = Transaction.Frequency.Weekly, during = 3)
+        credit(into = account, repeating = Daily, during = 5)
+        debit(from = account, repeating = Weekly, during = 3)
         account totalBalanceAt date(16, 1, 2020) shouldBe defaultValue * (5 - 3)
     }
 

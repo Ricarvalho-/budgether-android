@@ -1,16 +1,15 @@
 package br.edu.ifsp.scl.persistence.statement
 
 import br.edu.ifsp.scl.persistence.*
-import br.edu.ifsp.scl.persistence.account.Account
-import br.edu.ifsp.scl.persistence.statement.StatementDao.RelativeTransactionKind
-import br.edu.ifsp.scl.persistence.statement.StatementDao.RelativeTransactionKind.*
-import org.junit.Assert
+import br.edu.ifsp.scl.persistence.account.AccountEntity
+import br.edu.ifsp.scl.persistence.statement.StatementProvider.RelativeTransactionKind
+import br.edu.ifsp.scl.persistence.statement.StatementProvider.RelativeTransactionKind.*
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
 class PeriodAmountsByAccountTest : DatabaseTest() {
-    private lateinit var account: Account
+    private lateinit var account: AccountEntity
 
     private val amounts get() = statementDao.amountsIn(account, defaultRange) getting { observedValue }
 

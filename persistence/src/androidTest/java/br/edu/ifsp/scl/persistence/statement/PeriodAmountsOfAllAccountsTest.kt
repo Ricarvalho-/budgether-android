@@ -1,15 +1,15 @@
 package br.edu.ifsp.scl.persistence.statement
 
 import br.edu.ifsp.scl.persistence.*
-import br.edu.ifsp.scl.persistence.statement.StatementDao.TransactionKind
-import br.edu.ifsp.scl.persistence.statement.StatementDao.TransactionKind.*
+import br.edu.ifsp.scl.persistence.transaction.TransactionData.Kind
+import br.edu.ifsp.scl.persistence.transaction.TransactionData.Kind.*
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class PeriodAmountsOfAllAccountsTest : DatabaseTest() {
     private val amounts get() = statementDao amountsIn defaultRange getting { observedValue }
 
-    private fun amountsIn(kind: TransactionKind) =
+    private fun amountsIn(kind: Kind) =
         statementDao.categoriesAmountsIn(defaultRange, kind) getting { observedValue }
 
     @Test
@@ -20,7 +20,7 @@ class PeriodAmountsOfAllAccountsTest : DatabaseTest() {
         amounts shouldBe mapOf(
             Pair(Credit, defaultValue),
             Pair(Debit, defaultValue),
-            Pair(Transference, defaultValue)
+            Pair(Transfer, defaultValue)
         )
     }
 
@@ -48,7 +48,7 @@ class PeriodAmountsOfAllAccountsTest : DatabaseTest() {
         amounts shouldBe mapOf(
             Pair(Credit, defaultValue * 2),
             Pair(Debit, defaultValue * 2),
-            Pair(Transference, defaultValue * 2)
+            Pair(Transfer, defaultValue * 2)
         )
     }
 
@@ -72,7 +72,7 @@ class PeriodAmountsOfAllAccountsTest : DatabaseTest() {
             Pair(category, defaultValue)
         )
 
-        amountsIn(Transference) shouldBe mapOf(
+        amountsIn(Transfer) shouldBe mapOf(
             Pair(defaultTitle, defaultValue),
             Pair(category, defaultValue)
         )
@@ -108,7 +108,7 @@ class PeriodAmountsOfAllAccountsTest : DatabaseTest() {
             Pair(defaultTitle, defaultValue * 2)
         )
 
-        amountsIn(Transference) shouldBe mapOf(
+        amountsIn(Transfer) shouldBe mapOf(
             Pair(defaultTitle, defaultValue * 2)
         )
     }

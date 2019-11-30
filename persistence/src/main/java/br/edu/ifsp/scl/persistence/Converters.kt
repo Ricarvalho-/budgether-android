@@ -1,10 +1,10 @@
 package br.edu.ifsp.scl.persistence
 
 import androidx.room.TypeConverter
-import br.edu.ifsp.scl.persistence.transaction.Transaction.Frequency
+import br.edu.ifsp.scl.persistence.transaction.TransactionData.Frequency
 import java.util.*
 
-class Converters {
+internal class Converters {
     @TypeConverter fun dateFromTimestamp(value: Long) = Date(value)
     @TypeConverter fun dateToTimestamp(date: Date) = date.time
 

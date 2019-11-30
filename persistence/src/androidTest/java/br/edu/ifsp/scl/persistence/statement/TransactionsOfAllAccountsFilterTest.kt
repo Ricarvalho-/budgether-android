@@ -1,20 +1,20 @@
 package br.edu.ifsp.scl.persistence.statement
 
 import br.edu.ifsp.scl.persistence.*
-import br.edu.ifsp.scl.persistence.statement.StatementDao.TransactionKind
-import br.edu.ifsp.scl.persistence.statement.StatementDao.TransactionKind.*
 import br.edu.ifsp.scl.persistence.transaction.RepeatingTransaction
-import br.edu.ifsp.scl.persistence.transaction.Transaction
+import br.edu.ifsp.scl.persistence.transaction.TransactionData.Kind
+import br.edu.ifsp.scl.persistence.transaction.TransactionData.Kind.*
+import br.edu.ifsp.scl.persistence.transaction.TransactionEntity
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class TransactionsOfAllAccountsFilterTest : DatabaseTest() {
     private val transactions get() = transactionsOf()
 
-    private fun transactionsOf(kind: TransactionKind? = null, categories: List<String>? = null) =
+    private fun transactionsOf(kind: Kind? = null, categories: List<String>? = null) =
         statementDao.transactionsIn(defaultRange, kind, categories) getting { observedValue }
 
-    private fun repeating(transaction: Transaction) = RepeatingTransaction(transaction, defaultDate, 1)
+    private fun repeating(transaction: TransactionEntity) = RepeatingTransaction(transaction, defaultDate, 1)
 
     @Test
     fun transactionsShouldAppearWhenInsideDateRange() {
@@ -53,7 +53,7 @@ class TransactionsOfAllAccountsFilterTest : DatabaseTest() {
         debits shouldContain debit
         debits.shouldNotContain(credit, transfer)
 
-        val transfers = transactionsOf(Transference)
+        val transfers = transactionsOf(Transfer)
         transfers shouldContain transfer
         transfers.shouldNotContain(credit, debit)
     }
@@ -69,7 +69,7 @@ class TransactionsOfAllAccountsFilterTest : DatabaseTest() {
 
         assertTrue(transactionsOf(Credit)?.isEmpty() ?: false)
         assertTrue(transactionsOf(Debit)?.isEmpty() ?: false)
-        assertTrue(transactionsOf(Transference)?.isEmpty() ?: false)
+        assertTrue(transactionsOf(Transfer)?.isEmpty() ?: false)
     }
 
     @Test
@@ -101,7 +101,7 @@ class TransactionsOfAllAccountsFilterTest : DatabaseTest() {
         debits shouldContain desiredDebit
         debits.shouldNotContain(desiredCredit, anotherCredit, anotherDebit, desiredTransfer, anotherTransfer)
 
-        val transfers = transactionsOf(Transference, category)
+        val transfers = transactionsOf(Transfer, category)
         transfers shouldContain desiredTransfer
         transfers.shouldNotContain(desiredCredit, anotherCredit, desiredDebit, anotherDebit, anotherTransfer)
     }
@@ -125,7 +125,7 @@ class TransactionsOfAllAccountsFilterTest : DatabaseTest() {
         debits.shouldContain(someDebit, anotherDebit)
         debits.shouldNotContain(someCredit, anotherCredit, someTransfer, anotherTransfer)
 
-        val transfers = transactionsOf(Transference, categories)
+        val transfers = transactionsOf(Transfer, categories)
         transfers.shouldContain(someTransfer, anotherTransfer)
         transfers.shouldNotContain(someCredit, anotherCredit, someDebit, anotherDebit)
     }
@@ -148,7 +148,7 @@ class TransactionsOfAllAccountsFilterTest : DatabaseTest() {
         debits.shouldContain(someDebit, anotherDebit)
         debits.shouldNotContain(someCredit, anotherCredit, someTransfer, anotherTransfer)
 
-        val transfers = transactionsOf(Transference, listOf())
+        val transfers = transactionsOf(Transfer, listOf())
         transfers.shouldContain(someTransfer, anotherTransfer)
         transfers.shouldNotContain(someCredit, anotherCredit, someDebit, anotherDebit)
     }
@@ -165,7 +165,7 @@ class TransactionsOfAllAccountsFilterTest : DatabaseTest() {
         val category = listOf(defaultTitle)
         assertTrue(transactionsOf(Credit, category)?.isEmpty() ?: false)
         assertTrue(transactionsOf(Debit, category)?.isEmpty() ?: false)
-        assertTrue(transactionsOf(Transference, category)?.isEmpty() ?: false)
+        assertTrue(transactionsOf(Transfer, category)?.isEmpty() ?: false)
     }
 
     @Test

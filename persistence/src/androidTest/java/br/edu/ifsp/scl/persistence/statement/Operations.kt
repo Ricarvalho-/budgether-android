@@ -1,17 +1,18 @@
 package br.edu.ifsp.scl.persistence.statement
 
 import br.edu.ifsp.scl.persistence.*
-import br.edu.ifsp.scl.persistence.account.Account
-import br.edu.ifsp.scl.persistence.transaction.Transaction.*
+import br.edu.ifsp.scl.persistence.account.AccountEntity
+import br.edu.ifsp.scl.persistence.transaction.TransactionData.Frequency
+import br.edu.ifsp.scl.persistence.transaction.TransactionEntity.*
 import java.util.*
 
-fun DatabaseTest.credit(amount: Double = defaultValue,
+internal fun DatabaseTest.credit(amount: Double = defaultValue,
                         at: Date = defaultDate,
-                        into: Account = insertAccount(),
+                        into: AccountEntity = insertAccount(),
                         repeating: Frequency = Frequency.Single,
                         during: Int = 0,
                         about: String = defaultTitle) =
-    insert(Credit(sampleTransactionData(
+    insert(CreditEntity(sampleTransactionData(
         category = about,
         value = amount,
         startDate = at,
@@ -20,13 +21,13 @@ fun DatabaseTest.credit(amount: Double = defaultValue,
         accountId = into.id
     )))
 
-fun DatabaseTest.debit(amount: Double = defaultValue,
+internal fun DatabaseTest.debit(amount: Double = defaultValue,
                        at: Date = defaultDate,
-                       from: Account = insertAccount(),
+                       from: AccountEntity = insertAccount(),
                        repeating: Frequency = Frequency.Single,
                        during: Int = 0,
                        about: String = defaultTitle) =
-    insert(Debit(sampleTransactionData(
+    insert(DebitEntity(sampleTransactionData(
         category = about,
         value = amount,
         startDate = at,
@@ -35,14 +36,14 @@ fun DatabaseTest.debit(amount: Double = defaultValue,
         accountId = from.id
     )))
 
-fun DatabaseTest.transfer(amount: Double = defaultValue,
+internal fun DatabaseTest.transfer(amount: Double = defaultValue,
                           at: Date = defaultDate,
-                          from: Account = insertAccount(),
-                          to: Account = insertAccount(),
+                          from: AccountEntity = insertAccount(),
+                          to: AccountEntity = insertAccount(),
                           repeating: Frequency = Frequency.Single,
                           during: Int = 0,
                           about: String = defaultTitle) =
-    insert(Transference(
+    insert(TransferenceEntity(
         sampleTransactionData(
             category = about,
             value = amount,

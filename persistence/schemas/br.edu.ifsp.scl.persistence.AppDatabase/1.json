@@ -2,10 +2,10 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "4a785c932eb11710816c3786bd6acd0c",
+    "identityHash": "6a1826127f5c407191c51b77ad075a9a",
     "entities": [
       {
-        "tableName": "Account",
+        "tableName": "AccountEntity",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`title` TEXT NOT NULL, `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL)",
         "fields": [
           {
@@ -31,8 +31,8 @@
         "foreignKeys": []
       },
       {
-        "tableName": "Credit",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT NOT NULL, `category` TEXT NOT NULL, `value` REAL NOT NULL, `startDate` INTEGER NOT NULL, `frequency` INTEGER NOT NULL, `repeat` INTEGER NOT NULL, `accountId` INTEGER NOT NULL, FOREIGN KEY(`accountId`) REFERENCES `Account`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "tableName": "CreditEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT NOT NULL, `category` TEXT NOT NULL, `value` REAL NOT NULL, `startDate` INTEGER NOT NULL, `frequency` INTEGER NOT NULL, `repeat` INTEGER NOT NULL, `accountId` INTEGER NOT NULL, FOREIGN KEY(`accountId`) REFERENCES `AccountEntity`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "id",
@@ -91,41 +91,41 @@
         },
         "indices": [
           {
-            "name": "index_Credit_title",
+            "name": "index_CreditEntity_title",
             "unique": false,
             "columnNames": [
               "title"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_Credit_title` ON `${TABLE_NAME}` (`title`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_CreditEntity_title` ON `${TABLE_NAME}` (`title`)"
           },
           {
-            "name": "index_Credit_category",
+            "name": "index_CreditEntity_category",
             "unique": false,
             "columnNames": [
               "category"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_Credit_category` ON `${TABLE_NAME}` (`category`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_CreditEntity_category` ON `${TABLE_NAME}` (`category`)"
           },
           {
-            "name": "index_Credit_startDate",
+            "name": "index_CreditEntity_startDate",
             "unique": false,
             "columnNames": [
               "startDate"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_Credit_startDate` ON `${TABLE_NAME}` (`startDate`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_CreditEntity_startDate` ON `${TABLE_NAME}` (`startDate`)"
           },
           {
-            "name": "index_Credit_accountId",
+            "name": "index_CreditEntity_accountId",
             "unique": false,
             "columnNames": [
               "accountId"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_Credit_accountId` ON `${TABLE_NAME}` (`accountId`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_CreditEntity_accountId` ON `${TABLE_NAME}` (`accountId`)"
           }
         ],
         "foreignKeys": [
           {
-            "table": "Account",
+            "table": "AccountEntity",
             "onDelete": "CASCADE",
             "onUpdate": "NO ACTION",
             "columns": [
@@ -138,8 +138,8 @@
         ]
       },
       {
-        "tableName": "Debit",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT NOT NULL, `category` TEXT NOT NULL, `value` REAL NOT NULL, `startDate` INTEGER NOT NULL, `frequency` INTEGER NOT NULL, `repeat` INTEGER NOT NULL, `accountId` INTEGER NOT NULL, FOREIGN KEY(`accountId`) REFERENCES `Account`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "tableName": "DebitEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT NOT NULL, `category` TEXT NOT NULL, `value` REAL NOT NULL, `startDate` INTEGER NOT NULL, `frequency` INTEGER NOT NULL, `repeat` INTEGER NOT NULL, `accountId` INTEGER NOT NULL, FOREIGN KEY(`accountId`) REFERENCES `AccountEntity`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "id",
@@ -198,41 +198,41 @@
         },
         "indices": [
           {
-            "name": "index_Debit_title",
+            "name": "index_DebitEntity_title",
             "unique": false,
             "columnNames": [
               "title"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_Debit_title` ON `${TABLE_NAME}` (`title`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_DebitEntity_title` ON `${TABLE_NAME}` (`title`)"
           },
           {
-            "name": "index_Debit_category",
+            "name": "index_DebitEntity_category",
             "unique": false,
             "columnNames": [
               "category"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_Debit_category` ON `${TABLE_NAME}` (`category`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_DebitEntity_category` ON `${TABLE_NAME}` (`category`)"
           },
           {
-            "name": "index_Debit_startDate",
+            "name": "index_DebitEntity_startDate",
             "unique": false,
             "columnNames": [
               "startDate"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_Debit_startDate` ON `${TABLE_NAME}` (`startDate`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_DebitEntity_startDate` ON `${TABLE_NAME}` (`startDate`)"
           },
           {
-            "name": "index_Debit_accountId",
+            "name": "index_DebitEntity_accountId",
             "unique": false,
             "columnNames": [
               "accountId"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_Debit_accountId` ON `${TABLE_NAME}` (`accountId`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_DebitEntity_accountId` ON `${TABLE_NAME}` (`accountId`)"
           }
         ],
         "foreignKeys": [
           {
-            "table": "Account",
+            "table": "AccountEntity",
             "onDelete": "CASCADE",
             "onUpdate": "NO ACTION",
             "columns": [
@@ -245,12 +245,12 @@
         ]
       },
       {
-        "tableName": "Transference",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`destinationAccountId` INTEGER NOT NULL, `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT NOT NULL, `category` TEXT NOT NULL, `value` REAL NOT NULL, `startDate` INTEGER NOT NULL, `frequency` INTEGER NOT NULL, `repeat` INTEGER NOT NULL, `accountId` INTEGER NOT NULL, FOREIGN KEY(`accountId`) REFERENCES `Account`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`destinationAccountId`) REFERENCES `Account`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "tableName": "TransferenceEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`recipientAccountId` INTEGER NOT NULL, `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT NOT NULL, `category` TEXT NOT NULL, `value` REAL NOT NULL, `startDate` INTEGER NOT NULL, `frequency` INTEGER NOT NULL, `repeat` INTEGER NOT NULL, `accountId` INTEGER NOT NULL, FOREIGN KEY(`accountId`) REFERENCES `AccountEntity`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`recipientAccountId`) REFERENCES `AccountEntity`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
-            "fieldPath": "destinationAccountId",
-            "columnName": "destinationAccountId",
+            "fieldPath": "recipientAccountId",
+            "columnName": "recipientAccountId",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -311,49 +311,49 @@
         },
         "indices": [
           {
-            "name": "index_Transference_destinationAccountId",
+            "name": "index_TransferenceEntity_recipientAccountId",
             "unique": false,
             "columnNames": [
-              "destinationAccountId"
+              "recipientAccountId"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_Transference_destinationAccountId` ON `${TABLE_NAME}` (`destinationAccountId`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_TransferenceEntity_recipientAccountId` ON `${TABLE_NAME}` (`recipientAccountId`)"
           },
           {
-            "name": "index_Transference_title",
+            "name": "index_TransferenceEntity_title",
             "unique": false,
             "columnNames": [
               "title"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_Transference_title` ON `${TABLE_NAME}` (`title`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_TransferenceEntity_title` ON `${TABLE_NAME}` (`title`)"
           },
           {
-            "name": "index_Transference_category",
+            "name": "index_TransferenceEntity_category",
             "unique": false,
             "columnNames": [
               "category"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_Transference_category` ON `${TABLE_NAME}` (`category`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_TransferenceEntity_category` ON `${TABLE_NAME}` (`category`)"
           },
           {
-            "name": "index_Transference_startDate",
+            "name": "index_TransferenceEntity_startDate",
             "unique": false,
             "columnNames": [
               "startDate"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_Transference_startDate` ON `${TABLE_NAME}` (`startDate`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_TransferenceEntity_startDate` ON `${TABLE_NAME}` (`startDate`)"
           },
           {
-            "name": "index_Transference_accountId",
+            "name": "index_TransferenceEntity_accountId",
             "unique": false,
             "columnNames": [
               "accountId"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_Transference_accountId` ON `${TABLE_NAME}` (`accountId`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_TransferenceEntity_accountId` ON `${TABLE_NAME}` (`accountId`)"
           }
         ],
         "foreignKeys": [
           {
-            "table": "Account",
+            "table": "AccountEntity",
             "onDelete": "CASCADE",
             "onUpdate": "NO ACTION",
             "columns": [
@@ -364,11 +364,11 @@
             ]
           },
           {
-            "table": "Account",
+            "table": "AccountEntity",
             "onDelete": "CASCADE",
             "onUpdate": "NO ACTION",
             "columns": [
-              "destinationAccountId"
+              "recipientAccountId"
             ],
             "referencedColumns": [
               "id"
@@ -380,7 +380,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4a785c932eb11710816c3786bd6acd0c')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6a1826127f5c407191c51b77ad075a9a')"
     ]
   }
 }

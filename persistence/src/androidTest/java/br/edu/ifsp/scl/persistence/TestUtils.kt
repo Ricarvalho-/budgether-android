@@ -4,10 +4,11 @@ import androidx.core.util.rangeTo
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.test.espresso.matcher.ViewMatchers.assertThat
-import br.edu.ifsp.scl.persistence.account.Account
-import br.edu.ifsp.scl.persistence.transaction.Transaction
-import br.edu.ifsp.scl.persistence.transaction.Transaction.*
-import br.edu.ifsp.scl.persistence.transaction.insert
+import br.edu.ifsp.scl.persistence.account.AccountEntity
+import br.edu.ifsp.scl.persistence.transaction.Fields
+import br.edu.ifsp.scl.persistence.transaction.TransactionData.Frequency
+import br.edu.ifsp.scl.persistence.transaction.TransactionData.Frequency.Single
+import br.edu.ifsp.scl.persistence.transaction.TransactionEntity
 import kotlinx.coroutines.runBlocking
 import org.hamcrest.CoreMatchers.*
 import java.util.*
@@ -49,10 +50,10 @@ fun sampleTransactionData(
     category: String = defaultTitle,
     value: Double = defaultValue,
     startDate: Date = defaultDate,
-    frequency: Frequency = Frequency.Single,
+    frequency: Frequency = Single,
     repeat: Int = 0,
     accountId: Long = 0
-) = Data(title, category, value, startDate, frequency, repeat, accountId)
+) = Fields(title, category, value, startDate, frequency, repeat, accountId)
 
 fun date(day: Int, month: Int, year: Int) = Calendar.getInstance().run {
     clear()
@@ -60,16 +61,9 @@ fun date(day: Int, month: Int, year: Int) = Calendar.getInstance().run {
     time
 } as Date
 
-fun DatabaseTest.insertAccount(title: String = defaultTitle) = Account(title).run {
-    runBlocking { copy(id = accountDao.insert(this@run)) }
+internal fun DatabaseTest.insertAccount(title: String = defaultTitle) = AccountEntity(title).run {
+    runBlocking { accountDao.insert(this@run) } as AccountEntity
 }
 
-fun <T : Transaction> DatabaseTest.insert(transaction: T): T {
-    val id = runBlocking { transactionDao.insert(transaction) }
-    val t = transaction as Transaction
-    return when (t) {
-        is Credit -> t.copy(id = id)
-        is Debit -> t.copy(id = id)
-        is Transference -> t.copy(id = id)
-    } as T
-}
+fun <T : TransactionEntity> DatabaseTest.insert(transaction: T): T =
+    runBlocking { transactionDao.insert(transaction) } as T
