@@ -9,7 +9,7 @@ import org.junit.Before
 import org.junit.Test
 import java.util.*
 
-class AccountBalanceTest : DatabaseTest() {
+internal class AccountBalanceTest : DatabaseTest() {
     private lateinit var account: AccountEntity
     private val AccountEntity.currentTotalBalance get() = totalBalanceAt(defaultDate)
     private infix fun AccountEntity.totalBalanceAt(date: Date) = statementDao.balanceAt(this, date) getting { observedValue!! }

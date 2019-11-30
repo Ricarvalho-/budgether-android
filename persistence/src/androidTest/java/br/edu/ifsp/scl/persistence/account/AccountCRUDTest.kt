@@ -6,7 +6,7 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-class AccountCRUDTest : DatabaseTest() {
+internal class AccountCRUDTest : DatabaseTest() {
     @Test
     fun insertedAccountsShouldAppearInSelect() {
         val account1 = insertAccount()

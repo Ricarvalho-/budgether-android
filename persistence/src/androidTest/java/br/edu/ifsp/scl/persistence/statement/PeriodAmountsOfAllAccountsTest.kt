@@ -6,7 +6,7 @@ import br.edu.ifsp.scl.persistence.transaction.TransactionData.Kind.*
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-class PeriodAmountsOfAllAccountsTest : DatabaseTest() {
+internal class PeriodAmountsOfAllAccountsTest : DatabaseTest() {
     private val amounts get() = statementDao amountsIn defaultRange getting { observedValue }
 
     private fun amountsIn(kind: Kind) =

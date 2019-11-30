@@ -170,6 +170,9 @@ internal abstract class StatementDao : StatementProvider {
     //endregion
 
     //region Common
+    override fun allTransactionsBefore(date: Date, account: AccountData?): LiveData<List<RepeatingTransaction>> =
+        (account?.getAllTransactionsBefore(date) ?: this getAllTransactionsBefore date) repeatingBefore date
+
     private infix fun getAllTransactionsBefore(date: Date) = MediatorLiveData<List<TransactionEntity>>().apply {
         var credits = listOf<CreditEntity>()
         var debits = listOf<DebitEntity>()
@@ -190,9 +193,6 @@ internal abstract class StatementDao : StatementProvider {
             value = union()
         }
     } as LiveData<List<TransactionEntity>>
-
-    override fun AccountData.allTransactionsBefore(date: Date): LiveData<List<RepeatingTransaction>> =
-        this getAllTransactionsBefore date repeatingBefore date
 
     private infix fun AccountData.getAllTransactionsBefore(date: Date) = MediatorLiveData<List<TransactionEntity>>().apply {
         var credits = listOf<CreditEntity>()

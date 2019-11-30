@@ -8,7 +8,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
-class PeriodAmountsByAccountTest : DatabaseTest() {
+internal class PeriodAmountsByAccountTest : DatabaseTest() {
     private lateinit var account: AccountEntity
 
     private val amounts get() = statementDao.amountsIn(account, defaultRange) getting { observedValue }

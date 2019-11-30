@@ -7,7 +7,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.util.*
 
-class TotalBalanceTest : DatabaseTest() {
+internal class TotalBalanceTest : DatabaseTest() {
     private val currentTotalBalance get() = totalBalanceAt(defaultDate)
     private fun totalBalanceAt(date: Date) = statementDao totalBalanceAt date getting { observedValue!! }
 

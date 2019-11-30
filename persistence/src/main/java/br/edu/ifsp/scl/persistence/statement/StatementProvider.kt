@@ -21,7 +21,7 @@ interface StatementProvider : Repository {
     fun transactionsIn(range: Range<Date>, kind: Kind? = null, categories: List<String>? = null): LiveData<List<RepeatingTransaction>>
     fun transactionsIn(account: AccountData, range: Range<Date>, kind: RelativeTransactionKind? = null, categories: List<String>? = null): LiveData<List<RepeatingTransaction>>
 
-    infix fun AccountData.allTransactionsBefore(date: Date): LiveData<List<RepeatingTransaction>>
+    fun allTransactionsBefore(date: Date, account: AccountData? = null): LiveData<List<RepeatingTransaction>>
 
     enum class RelativeTransactionKind { Credit, Debit, SentTransference, ReceivedTransference }
 }

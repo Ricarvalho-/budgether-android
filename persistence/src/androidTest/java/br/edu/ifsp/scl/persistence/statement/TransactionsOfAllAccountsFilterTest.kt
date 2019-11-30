@@ -8,7 +8,7 @@ import br.edu.ifsp.scl.persistence.transaction.TransactionEntity
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-class TransactionsOfAllAccountsFilterTest : DatabaseTest() {
+internal class TransactionsOfAllAccountsFilterTest : DatabaseTest() {
     private val transactions get() = transactionsOf()
 
     private fun transactionsOf(kind: Kind? = null, categories: List<String>? = null) =

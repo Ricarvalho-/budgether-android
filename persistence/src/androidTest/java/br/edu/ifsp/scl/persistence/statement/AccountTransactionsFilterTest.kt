@@ -10,7 +10,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
-class AccountTransactionsFilterTest : DatabaseTest() {
+internal class AccountTransactionsFilterTest : DatabaseTest() {
     private lateinit var account: AccountEntity
 
     private val transactions get() = transactionsOf()

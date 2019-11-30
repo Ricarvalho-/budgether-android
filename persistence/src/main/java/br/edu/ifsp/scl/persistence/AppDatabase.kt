@@ -11,8 +11,10 @@ import br.edu.ifsp.scl.persistence.account.AccountRepository
 import br.edu.ifsp.scl.persistence.statement.StatementDao
 import br.edu.ifsp.scl.persistence.statement.StatementProvider
 import br.edu.ifsp.scl.persistence.transaction.TransactionDao
+import br.edu.ifsp.scl.persistence.transaction.TransactionDaoForTests
 import br.edu.ifsp.scl.persistence.transaction.TransactionEntity.*
 import br.edu.ifsp.scl.persistence.transaction.TransactionRepository
+import org.jetbrains.annotations.TestOnly
 
 @Database(version = 1, entities = [
     AccountEntity::class,
@@ -25,6 +27,7 @@ internal abstract class AppDatabase : RoomDatabase() {
     abstract val accountDao: AccountDao
     abstract val transactionDao: TransactionDao
     abstract val statementDao: StatementDao
+    @TestOnly abstract fun transactionDaoForTests(): TransactionDaoForTests
 
     companion object {
         @Volatile private var appDatabaseInstance: AppDatabase? = null

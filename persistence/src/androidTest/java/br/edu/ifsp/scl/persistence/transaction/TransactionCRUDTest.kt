@@ -9,7 +9,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.util.*
 
-class TransactionCRUDTest : DatabaseTest() {
+internal class TransactionCRUDTest : DatabaseTest() {
     private val sampleDate = Date()
     private fun sampleTransactionData(
         account: AccountEntity,
@@ -26,7 +26,7 @@ class TransactionCRUDTest : DatabaseTest() {
         val debit = insert(DebitEntity(data))
         val transference = insert(TransferenceEntity(data, insertAccount().id))
 
-        transactionDao.allTransactions().observedValue?.shouldContain(credit, debit, transference)
+        transactionDaoForTests.allTransactions().observedValue?.shouldContain(credit, debit, transference)
     }
 
     @Test
@@ -39,9 +39,9 @@ class TransactionCRUDTest : DatabaseTest() {
         val debit = insert(DebitEntity(data))
         val transference = insert(TransferenceEntity(data, secondAccount.id))
 
-        transactionDao.allTransactionsOf(account).observedValue?.shouldContain(credit, debit, transference)
-        transactionDao.allTransactionsOf(secondAccount).observedValue?.shouldNotContain(credit, debit)
-        transactionDao.allTransactionsOf(secondAccount).observedValue?.shouldContain(transference)
+        transactionDaoForTests.allTransactionsOf(account).observedValue?.shouldContain(credit, debit, transference)
+        transactionDaoForTests.allTransactionsOf(secondAccount).observedValue?.shouldNotContain(credit, debit)
+        transactionDaoForTests.allTransactionsOf(secondAccount).observedValue?.shouldContain(transference)
     }
 
     @Test
@@ -57,15 +57,15 @@ class TransactionCRUDTest : DatabaseTest() {
         insert(TransferenceEntity(data, insertAccount().id))
         insert(TransferenceEntity(data, insertAccount().id))
 
-        transactionDao.allCreditTransactions().observedValue?.let {
+        transactionDaoForTests.allCreditTransactions().observedValue?.let {
             it.first() shouldBeDifferentFrom it.last()
         }
 
-        transactionDao.allDebitTransactions().observedValue?.let {
+        transactionDaoForTests.allDebitTransactions().observedValue?.let {
             it.first() shouldBeDifferentFrom it.last()
         }
 
-        transactionDao.allTransferenceTransactions().observedValue?.let {
+        transactionDaoForTests.allTransferenceTransactions().observedValue?.let {
             it.first() shouldBeDifferentFrom it.last()
         }
     }
@@ -117,13 +117,13 @@ class TransactionCRUDTest : DatabaseTest() {
             sampleTransactionData(insertAccount(), "Original")
         ))
 
-        transactionDao.allTransactions().observedValue?.first()?.let {
+        transactionDaoForTests.allTransactions().observedValue?.first()?.let {
             it shouldBeEqualTo originalTransaction
         }
 
         val updatedTransaction = originalTransaction.run { copy(data.copy("Updated")) }
         runBlocking { transactionDao.update(updatedTransaction) }
-        transactionDao.allTransactions().observedValue?.first()?.let {
+        transactionDaoForTests.allTransactions().observedValue?.first()?.let {
             it shouldBeDifferentFrom originalTransaction
             it shouldBeEqualTo updatedTransaction
         }
@@ -147,7 +147,7 @@ class TransactionCRUDTest : DatabaseTest() {
         val data = sampleTransactionData(insertAccount())
         val transaction = insert(CreditEntity(data))
         runBlocking { transactionDao.delete(transaction) }
-        assertTrue(transactionDao.allTransactions().observedValue?.isEmpty() ?: false)
+        assertTrue(transactionDaoForTests.allTransactions().observedValue?.isEmpty() ?: false)
     }
 
     @Test
@@ -161,8 +161,8 @@ class TransactionCRUDTest : DatabaseTest() {
 
         runBlocking { accountDao.delete(destinationAccount) }
 
-        transactionDao.allTransactions().observedValue?.shouldContain(credit, debit)
-        transactionDao.allTransactions().observedValue?.shouldNotContain(transference)
+        transactionDaoForTests.allTransactions().observedValue?.shouldContain(credit, debit)
+        transactionDaoForTests.allTransactions().observedValue?.shouldNotContain(transference)
     }
 
     @Test
@@ -240,7 +240,7 @@ class TransactionCRUDTest : DatabaseTest() {
         insert(CreditEntity(sampleTransactionData(account, category = "a")))
         insert(CreditEntity(sampleTransactionData(insertAccount(), category = "b")))
 
-        transactionDao.allTransactionCategoriesOfAccount(account.id)
+        transactionDaoForTests.allTransactionCategoriesOfAccount(account.id)
             .observedValue?.shouldBeEqualTo(listOf("a"))
     }
 }

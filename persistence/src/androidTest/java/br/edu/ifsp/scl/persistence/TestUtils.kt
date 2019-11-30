@@ -65,5 +65,5 @@ internal fun DatabaseTest.insertAccount(title: String = defaultTitle) = AccountE
     runBlocking { accountDao.insert(this@run) } as AccountEntity
 }
 
-fun <T : TransactionEntity> DatabaseTest.insert(transaction: T): T =
+internal fun <T : TransactionEntity> DatabaseTest.insert(transaction: T): T =
     runBlocking { transactionDao.insert(transaction) } as T

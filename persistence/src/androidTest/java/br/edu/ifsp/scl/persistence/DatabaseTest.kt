@@ -8,25 +8,27 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import br.edu.ifsp.scl.persistence.account.AccountDao
 import br.edu.ifsp.scl.persistence.statement.StatementDao
 import br.edu.ifsp.scl.persistence.transaction.TransactionDao
+import br.edu.ifsp.scl.persistence.transaction.TransactionDaoForTests
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-abstract class DatabaseTest {
+internal abstract class DatabaseTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
 
     private lateinit var db: AppDatabase
-    internal lateinit var transactionDao: TransactionDao
-    internal lateinit var accountDao: AccountDao
-    internal lateinit var statementDao: StatementDao
+    lateinit var transactionDaoForTests: TransactionDaoForTests
+    lateinit var transactionDao: TransactionDao
+    lateinit var accountDao: AccountDao
+    lateinit var statementDao: StatementDao
 
     @Before
     fun prepareDependencies() {
         createDb()
-        createDaos()
+        createDAOs()
     }
 
     private fun createDb() {
@@ -34,7 +36,8 @@ abstract class DatabaseTest {
         db = Room.inMemoryDatabaseBuilder(context, AppDatabase::class.java).build()
     }
 
-    private fun createDaos() {
+    private fun createDAOs() {
+        transactionDaoForTests = db.transactionDaoForTests()
         transactionDao = db.transactionDao
         accountDao = db.accountDao
         statementDao = db.statementDao
