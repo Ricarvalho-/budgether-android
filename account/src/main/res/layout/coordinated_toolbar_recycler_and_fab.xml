@@ -29,9 +29,8 @@
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
-
-    </androidx.recyclerview.widget.RecyclerView>
+        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
+        tools:listitem="@layout/account_item" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/addFab"
