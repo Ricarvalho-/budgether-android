@@ -80,27 +80,37 @@ interface TransferenceData : TransactionData {
     enum class RelativeKind { Sent, Received, Unrelated }
 }
 
-data class Fields(
-    override val title: String,
-    override val category: String,
-    override val value: Double,
-    override val startDate: Date,
-    override val frequency: Frequency,
-    override val repeat: Int,
-    override val accountId: Long
+data class Fields internal constructor(
+    override val accountId: Long,
+    override val title: String = "",
+    override val category: String = "",
+    override val value: Double = 0.0,
+    override val startDate: Date = Date(),
+    override val frequency: Frequency = Frequency.Single,
+    override val repeat: Int = 0
 ) : TransactionFields {
     companion object {
         infix fun from(data: TransactionData) = Fields(
-            data.title, data.category, data.value, data.startDate,
-            data.frequency, data.repeat, data.accountId
+            data.accountId, data.title, data.category, data.value,
+            data.startDate, data.frequency, data.repeat
         )
     }
 }
 
-data class Transaction(
-    val fields: TransactionFields, override val kind: TransactionData.Kind
+data class Transaction internal constructor(
+    val fields: TransactionFields,
+    override val kind: TransactionData.Kind,
+    override val id: Long
 ) : TransactionData, TransactionFields by fields {
-    override val id = 0L
+    companion object {
+        infix fun from(data: TransactionData) = Transaction(
+            Fields from data, data.kind, data.id
+        )
+
+        infix fun defaultOn(account: AccountData) = Transaction(
+            Fields(account.id), Credit, 0L
+        )
+    }
 }
 
 internal val TransactionData.isIndeterminate

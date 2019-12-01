@@ -13,7 +13,11 @@ import br.edu.ifsp.scl.persistence.transaction.TransactionData
 import kotlinx.android.synthetic.main.account_item.view.*
 import kotlin.properties.Delegates
 
-class AccountsAdapter : RecyclerView.Adapter<AccountsAdapter.ViewHolder>(), DifferentiableAdapter {
+class AccountsAdapter(
+    var accountSelectionListener: (AccountData) -> Unit,
+    var nearestTransactionSelectionListener: (TransactionData) -> Unit
+) : RecyclerView.Adapter<AccountsAdapter.ViewHolder>(), DifferentiableAdapter {
+
     var accounts: List<AccountSummary> by Delegates.observable(emptyList()) { _, old, new ->
         notifyChangesBetween(old, new) { a1, a2 -> a1.accountData.id == a2.accountData.id }
     }
@@ -22,7 +26,16 @@ class AccountsAdapter : RecyclerView.Adapter<AccountsAdapter.ViewHolder>(), Diff
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = ViewHolder(
         LayoutInflater.from(parent.context).inflate(R.layout.account_item, parent, false)
-    )
+    ).apply {
+        itemView.setOnClickListener {
+            accountSelectionListener(accounts[adapterPosition].accountData)
+        }
+        // FIXME: Set listener on transaction view
+        itemView.setOnClickListener {
+            val transaction = accounts[adapterPosition].nearestTransactionData
+            transaction?.let(nearestTransactionSelectionListener)
+        }
+    }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) = with(accounts[position]) {
         holder.titleTextView.text = accountData.title

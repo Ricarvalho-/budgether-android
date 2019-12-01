@@ -20,4 +20,15 @@ interface AccountData {
 
 internal val AccountData.entity get() = takeIf { it is AccountEntity } as AccountEntity? ?: AccountEntity from this
 
-data class Account(override val title: String, override val id: Long = 0L) : AccountData
+data class Account internal constructor(
+    override var title: String,
+    override val id: Long = 0L
+) : AccountData {
+    companion object {
+        infix fun from(data: AccountData) = Account(
+            data.title, data.id
+        )
+
+        infix fun with(title: String) = Account(title)
+    }
+}
