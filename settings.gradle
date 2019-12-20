@@ -1,2 +1,2 @@
-include ':app', ':common', ':persistence', ':account', ':statement'
+include ':app', ':common', ':persistence', ':account', ':statement', ':transaction'
 rootProject.name='Budgether'

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="viewModel"
+            type="br.edu.ifsp.scl.transaction.details.TransactionDetailsViewModel" />
+    </data>
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/appbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingBottom="72dp"
+                app:layout_scrollFlags="scroll|snap">
+
+                <androidx.appcompat.widget.Toolbar
+                    android:id="@+id/toolbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="?attr/actionBarSize" />
+            </FrameLayout>
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingTop="64dp"
+            android:clipToPadding="false"
+            app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
+
+            <include
+                layout="@layout/transaction_details_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:viewModel="@{viewModel}" />
+        </androidx.core.widget.NestedScrollView>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/kindFab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:fabCustomSize="128dp"
+            app:maxImageSize="128dp"
+            app:layout_anchor="@id/appbar"
+            app:layout_anchorGravity="bottom|center_horizontal"
+            tools:srcCompat="@tools:sample/avatars" />
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+</layout>
