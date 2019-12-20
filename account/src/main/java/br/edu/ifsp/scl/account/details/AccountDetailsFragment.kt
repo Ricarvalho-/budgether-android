@@ -8,15 +8,20 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import br.edu.ifsp.scl.account.R
 import br.edu.ifsp.scl.account.edit.AccountTitleViewModel
 import br.edu.ifsp.scl.account.edit.TitleEditTextDialogFragment
 import br.edu.ifsp.scl.common.currencyFormatted
+import br.edu.ifsp.scl.transaction.details.TransactionDetailsViewModel
+import br.edu.ifsp.scl.transaction.list.TransactionsViewModel
 import kotlinx.android.synthetic.main.coordinated_toolbar_frame_and_fab.*
 
 class AccountDetailsFragment : Fragment() {
     private val detailsViewModel: AccountDetailsViewModel by activityViewModels()
     private val titleViewModel: AccountTitleViewModel by activityViewModels()
+    private val transactionsViewModel: TransactionsViewModel by activityViewModels()
+    private val transactionDetailsViewModel: TransactionDetailsViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -29,10 +34,15 @@ class AccountDetailsFragment : Fragment() {
         setupFab()
         setupEditButton()
         setupDeleteButton()
+
+        // TODO: Refactor statement button to menu
+        statementButton.setOnClickListener {
+            findNavController().navigate(R.id.action_accountDetailsFragment_to_statement_nav_graph)
+        }
     }
 
     private fun observeAccountBalance() = detailsViewModel.balance.selectedAccount.observe(
-        this, Observer { balanceTextView.text = it.currencyFormatted() }
+        this, Observer { balanceTextView.text = "${detailsViewModel.selection.lastSelected.value?.title}: ${it.currencyFormatted()}" }
     )
 
     private fun setupContent() {
@@ -43,7 +53,7 @@ class AccountDetailsFragment : Fragment() {
     private fun observeAccountTransactions() =
         detailsViewModel.list.transactionsOfSelectedAccount.observe(
             this, Observer {
-                // TODO: Update transactions list view model
+                transactionsViewModel.set(it)
             }
         )
 
@@ -56,7 +66,8 @@ class AccountDetailsFragment : Fragment() {
 
     private fun observeTransactionCreation() = lifecycleScope.launchWhenStarted {
         for (transaction in detailsViewModel.creator.newTransactionChannel) {
-            // TODO: Navigate to details
+            transactionDetailsViewModel.selectTransaction(transaction)
+            findNavController().navigate(R.id.action_accountDetailsFragment_to_transaction_nav_graph)
         }
     }
 
@@ -73,5 +84,5 @@ class AccountDetailsFragment : Fragment() {
     private fun showAccountEditDialog() =
         TitleEditTextDialogFragment().show(requireFragmentManager(), null)
 
-    private fun setupDeleteButton() {} // TODO: Call viewModel's delete and navigate back
+    private fun setupDeleteButton() {} // TODO: Show confirmation dialog and call viewModel's delete and navigate back
 }

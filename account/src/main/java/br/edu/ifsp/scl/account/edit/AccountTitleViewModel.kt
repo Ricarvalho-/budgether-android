@@ -21,7 +21,12 @@ class AccountTitleViewModel : ViewModel() {
 
     class InsertedValueUseCase(private val viewModel: ViewModel) {
         private var _titleChannel = Channel<String>()
-        val titleChannel get() = _titleChannel as ReceiveChannel<String>
+        val titleChannel : ReceiveChannel<String>
+            get() {
+                _titleChannel.cancel()
+                _titleChannel = Channel()
+                return _titleChannel
+            }
 
         infix fun confirmWith(title: String) = viewModel.viewModelScope.launch {
             _titleChannel.send(title)

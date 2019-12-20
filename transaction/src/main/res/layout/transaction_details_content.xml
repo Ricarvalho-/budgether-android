@@ -24,11 +24,12 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
-            <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+            <com.google.android.material.textfield.TextInputEditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textShortMessage|textCapWords"
                 android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                android:text="@={viewModel.category}"
                 tools:text="Category" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -43,11 +44,12 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/categoryTextInputLayout">
 
-            <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+            <com.google.android.material.textfield.TextInputEditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textShortMessage|textCapWords"
                 android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                android:text="@={viewModel.title}"
                 tools:text="Title" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -68,8 +70,9 @@
                 android:layout_height="wrap_content"
                 android:imeOptions="actionDone"
                 android:inputType="numberDecimal"
-                tools:text="0.00"
-                android:textAppearance="@style/TextAppearance.AppCompat.Display1" />
+                android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+                android:text="@={viewModel.value}"
+                tools:text="0.00" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -91,6 +94,7 @@
                 android:layout_height="wrap_content"
                 android:editable="false"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                android:text="@{viewModel.account}"
                 tools:text="Account" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -101,6 +105,8 @@
             android:layout_height="48dp"
             android:contentDescription="@string/swap_accounts_description"
             android:src="@drawable/ic_swap_vert_black_24dp"
+            android:tint="@color/material_on_background_emphasis_medium"
+            app:goneElseVisibleWhen="@{!viewModel.transferFieldsShoulBeVisible}"
             app:layout_constraintBottom_toBottomOf="@+id/recipientAccountTextInputLayout"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@+id/accountTextInputLayout" />
@@ -113,6 +119,7 @@
             android:layout_marginTop="16dp"
             android:layout_marginEnd="16dp"
             android:hint="@string/recipient_account_field_placeholder"
+            app:goneElseVisibleWhen="@{!viewModel.transferFieldsShoulBeVisible}"
             app:endIconMode="dropdown_menu"
             app:layout_constraintEnd_toStartOf="@+id/swapAccountsImageButton"
             app:layout_constraintStart_toStartOf="parent"
@@ -124,6 +131,7 @@
                 android:layout_height="wrap_content"
                 android:editable="false"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                android:text="@{viewModel.recipientAccount}"
                 tools:text="Recipient account" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -144,6 +152,7 @@
                 android:layout_height="wrap_content"
                 android:editable="false"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                android:text="@{viewModel.date}"
                 tools:text="01/01/01" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -167,6 +176,7 @@
                 android:layout_height="wrap_content"
                 android:editable="false"
                 android:textAppearance="@style/TextAppearance.AppCompat.Small"
+                android:text="@{viewModel.frequency}"
                 tools:text="Single" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -188,6 +198,7 @@
                 android:layout_height="wrap_content"
                 android:editable="false"
                 android:textAppearance="@style/TextAppearance.AppCompat.Small"
+                android:text="@{viewModel.times}"
                 tools:text="0x" />
         </com.google.android.material.textfield.TextInputLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>

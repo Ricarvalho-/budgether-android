@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
-import br.edu.ifsp.scl.common.MarginItemDecoration
+import br.edu.ifsp.scl.common.ItemMarginDecoration
 import br.edu.ifsp.scl.common.attachSnapHelperWithListener
 import kotlinx.android.synthetic.main.large_centered_text_view.view.*
 import java.util.*
@@ -105,12 +105,12 @@ class DatePeriodSelectionRecyclerViewManager(recyclerView: RecyclerView,
     private val recyclerViewAdapter = Adapter(listOf(yearManager, monthManager))
 
     init {
+        onPeriodSelected(selectedPeriod)
         recyclerView.apply {
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
             adapter = recyclerViewAdapter
         }.also {
-            val margin = it.resources.getDimension(R.dimen.date_range_selection_item_vertical_margin)
-            it.addItemDecoration(MarginItemDecoration(margin.toInt()))
+            it.addItemDecoration(ItemMarginDecoration(R.dimen.date_range_selection_item_vertical_margin))
         }.run {
             scrollToPosition(when (selectedPeriod) {
                 is Period.Year -> recyclerViewAdapter.positionOf(yearManager)
@@ -161,8 +161,7 @@ private class PeriodRecyclerViewManager<P : Period>(selectedPeriod: P, private v
                 layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
                 adapter = recyclerViewAdapter
             }?.also {
-                val margin = it.resources.getDimension(R.dimen.date_range_selection_item_horizontal_margin)
-                it.addItemDecoration(MarginItemDecoration(margin.toInt()))
+                it.addItemDecoration(ItemMarginDecoration(R.dimen.date_range_selection_item_horizontal_margin))
 
                 it.scrollToPosition(recyclerViewAdapter.positionOf(selectedPeriod))
 

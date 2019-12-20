@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/transaction_nav_graph"
+    app:startDestination="@id/transactionDetailsFragment">
+
+    <fragment
+        android:id="@+id/transactionDetailsFragment"
+        android:name="br.edu.ifsp.scl.transaction.details.TransactionDetailsFragment"
+        android:label="TransactionDetailsFragment" />
+</navigation>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/account_nav_graph"
+    app:startDestination="@id/accountsFragment">
+
+    <fragment
+        android:id="@+id/accountsFragment"
+        android:name="br.edu.ifsp.scl.account.list.AccountsFragment"
+        android:label="AccountsFragment" >
+        <action
+            android:id="@+id/action_accountsFragment_to_accountDetailsFragment"
+            app:destination="@id/accountDetailsFragment" />
+        <action
+            android:id="@+id/action_accountsFragment_to_transaction_nav_graph"
+            app:destination="@id/transaction_nav_graph" />
+        <action
+            android:id="@+id/action_accountsFragment_to_statement_nav_graph"
+            app:destination="@id/statement_nav_graph" />
+    </fragment>
+    <fragment
+        android:id="@+id/accountDetailsFragment"
+        android:name="br.edu.ifsp.scl.account.details.AccountDetailsFragment"
+        android:label="AccountDetailsFragment" >
+        <action
+            android:id="@+id/action_accountDetailsFragment_to_transaction_nav_graph"
+            app:destination="@id/transaction_nav_graph" />
+        <action
+            android:id="@+id/action_accountDetailsFragment_to_statement_nav_graph"
+            app:destination="@id/statement_nav_graph" />
+    </fragment>
+    <include app:graph="@navigation/transaction_nav_graph" />
+    <include app:graph="@navigation/statement_nav_graph" />
+</navigation>

@@ -31,10 +31,10 @@ class AccountsAdapter(
             accountSelectionListener(accounts[adapterPosition].accountData)
         }
         // FIXME: Set listener on transaction view
-        itemView.setOnClickListener {
-            val transaction = accounts[adapterPosition].nearestTransactionData
-            transaction?.let(nearestTransactionSelectionListener)
-        }
+//        transactionView.setOnClickListener {
+//            val transaction = accounts[adapterPosition].nearestTransactionData
+//            transaction?.let(nearestTransactionSelectionListener)
+//        }
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) = with(accounts[position]) {

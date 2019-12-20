@@ -16,13 +16,20 @@
             android:layout_height="?attr/actionBarSize"
             app:layout_scrollFlags="scroll|snap" />
 
+        <Button
+            android:id="@+id/statementButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:text="@string/statement"
+            app:layout_scrollFlags="scroll|snap|enterAlways" />
+
         <TextView
             android:id="@+id/balanceTextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="16dp"
-            tools:text="$0.00"
-            app:layout_scrollFlags="scroll|snap|enterAlways" />
+            tools:text="$0.00" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.recyclerview.widget.RecyclerView

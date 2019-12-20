@@ -16,19 +16,33 @@
             android:layout_height="?attr/actionBarSize"
             app:layout_scrollFlags="scroll|snap" />
 
+        <Button
+            android:id="@+id/statementButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:text="@string/statement"
+            app:layout_scrollFlags="scroll|snap|enterAlways" />
+
         <TextView
             android:id="@+id/balanceTextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="16dp"
-            tools:text="$0.00"
-            app:layout_scrollFlags="scroll|snap|enterAlways" />
+            tools:text="$0.00" />
     </com.google.android.material.appbar.AppBarLayout>
 
-    <fragment
-        android:id="@+id/transactionListFragment"
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
+
+        <fragment
+            class="br.edu.ifsp.scl.transaction.list.TransactionsFragment"
+            android:id="@+id/transactionListFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </androidx.core.widget.NestedScrollView>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/addFab"

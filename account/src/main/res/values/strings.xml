@@ -3,4 +3,5 @@
     <string name="positive_dialog_button">OK</string>
     <string name="negative_dialog_button">Cancel</string>
     <string name="account_title_hint">Account title</string>
+    <string name="statement">Statement</string>
 </resources>

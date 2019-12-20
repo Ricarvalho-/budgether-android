@@ -28,6 +28,14 @@
                     android:id="@+id/toolbar"
                     android:layout_width="match_parent"
                     android:layout_height="?attr/actionBarSize" />
+
+                <Button
+                    android:id="@+id/saveButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="16dp"
+                    android:text="@string/save"
+                    app:layout_scrollFlags="scroll|snap" />
             </FrameLayout>
         </com.google.android.material.appbar.AppBarLayout>
 

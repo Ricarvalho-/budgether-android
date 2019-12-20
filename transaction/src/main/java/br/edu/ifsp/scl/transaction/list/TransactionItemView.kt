@@ -18,7 +18,7 @@ class TransactionItemView @JvmOverloads constructor(context: Context,
     var viewModel: ViewModel? = null
     set(value) {
         field = value
-        if (value != null) categoryImageView.setCircularImage(resources, value.image)
+        if (value != null) kindImageView.setCircularImage(resources, value.image)
         titleTextView.text = value?.title
         valueTextView.text = value?.value?.currencyFormatted()
         dateTextView.text = value?.date?.shortFormatted(context)

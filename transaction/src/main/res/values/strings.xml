@@ -9,4 +9,7 @@
     <string name="frequency_field_placeholder">Frequency</string>
     <string name="times_field_placeholder">Times</string>
     <string name="swap_accounts_description">Swap accounts</string>
+    <string name="transaction_number_template">%1$d of %2$d</string>
+    <string name="transaction_number_indeterminate_template">%1$d</string>
+    <string name="save">Save</string>
 </resources>

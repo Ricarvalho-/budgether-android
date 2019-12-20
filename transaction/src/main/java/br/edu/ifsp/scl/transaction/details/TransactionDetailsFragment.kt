@@ -1,22 +1,22 @@
 package br.edu.ifsp.scl.transaction.details
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.databinding.DataBindingUtil
-import androidx.fragment.app.viewModels
-import br.edu.ifsp.scl.transaction.R
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
+import br.edu.ifsp.scl.persistence.FromRepositories
+import br.edu.ifsp.scl.persistence.transaction.Fields
+import br.edu.ifsp.scl.persistence.transaction.Transaction
+import br.edu.ifsp.scl.persistence.transaction.TransactionRepository
 import br.edu.ifsp.scl.transaction.databinding.TransactionDetailsFragmentBinding
 import kotlinx.android.synthetic.main.transaction_details_fragment.*
 
 class TransactionDetailsFragment : Fragment() {
-    companion object {
-        fun newInstance() = TransactionDetailsFragment()
-    }
-
-    private val viewModel: TransactionDetailsViewModel by viewModels({ requireActivity() })
+    private val viewModel: TransactionDetailsViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -28,6 +28,22 @@ class TransactionDetailsFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+
+        // FIXME: Refactor to view model
+        val transactionRepository: TransactionRepository = FromRepositories with requireContext()
+        saveButton.setOnClickListener {
+            val transaction = viewModel.selectedTransaction().value ?: return@setOnClickListener
+            val data = (Transaction from transaction).copy((Fields from transaction).copy(
+                category = viewModel.category.value ?: "",
+                title = viewModel.title.value ?: "",
+                value = viewModel.value.value?.toDouble() ?: 0.0
+            ))
+            lifecycleScope.launchWhenStarted {
+                transactionRepository.update(data)
+                findNavController().popBackStack()
+            }
+        }
+
         kindFab.setOnClickListener {
             // TODO: Open kind selector
             // if changed, delete transaction and insert of new kind with old data

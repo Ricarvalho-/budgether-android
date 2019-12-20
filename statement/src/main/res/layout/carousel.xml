@@ -18,5 +18,5 @@
         android:layout_alignParentBottom="true"
         app:tabBackground="@drawable/dot_indicator_selector"
         app:tabGravity="center"
-        app:tabIndicatorHeigth="0dp" />
+        app:tabIndicatorHeight="0dp" />
 </RelativeLayout>

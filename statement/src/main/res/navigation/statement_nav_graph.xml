@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto" android:id="@+id/statement_nav_graph"
+    app:startDestination="@id/statementFragment">
+
+    <fragment
+        android:id="@+id/statementFragment"
+        android:name="br.edu.ifsp.scl.statement.StatementFragment"
+        android:label="StatementFragment" >
+        <action
+            android:id="@+id/action_statementFragment_to_transaction_nav_graph"
+            app:destination="@id/transaction_nav_graph" />
+    </fragment>
+    <include app:graph="@navigation/transaction_nav_graph" />
+</navigation>
